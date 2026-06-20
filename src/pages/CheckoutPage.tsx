@@ -20,7 +20,6 @@ const REGIONS = ['Greater Accra', 'Ashanti', 'Central', 'Eastern', 'Western', 'N
 
 const PAYMENT_METHODS: { value: PaymentMethod; label: string; desc: string; icon: React.FC<any>; disabled?: boolean }[] = [
   { value: 'mobile_money', label: 'Mobile Money', desc: 'MTN MoMo, Vodafone Cash, AirtelTigo Money', icon: Smartphone },
-  { value: 'cash_on_delivery', label: 'Cash on Delivery', desc: 'Pay when you receive', icon: Package },
 ];
 
 export default function CheckoutPage() {
@@ -45,9 +44,9 @@ export default function CheckoutPage() {
   const [orderSummaryOpen, setOrderSummaryOpen] = useState(false);
   const [paymentError, setPaymentError] = useState('');
 
-  const shippingCost = subtotal >= 500 ? 0 : 25;
+  const shippingCost = 0;
   const discountAmount = discountResult?.amount || 0;
-  const total = subtotal - discountAmount + shippingCost;
+  const total = subtotal - discountAmount;
 
   const update = (field: string, value: string) => {
     setForm(prev => ({ ...prev, [field]: value }));
@@ -203,13 +202,8 @@ export default function CheckoutPage() {
       // Use Paystack for mobile money
       initiatePaystackPayment();
     } else {
-      // Cash on delivery — save order directly
-      const orderNumber = await saveOrder('pending');
-      if (orderNumber) {
-        clearCart();
-        setOrderSuccess(orderNumber);
-      }
-      setSubmitting(false);
+      // Fallback — should not happen since only mobile money is available
+      initiatePaystackPayment();
     }
   };
 
@@ -353,19 +347,6 @@ export default function CheckoutPage() {
                   </div>
                 </motion.div>
               )}
-
-              {form.payment_method === 'cash_on_delivery' && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  className="mt-4 p-4 rounded-xl bg-warning-500/5 border border-warning-500/20"
-                >
-                  <div className="flex gap-2 text-warning-400 text-xs">
-                    <Info size={14} className="shrink-0 mt-0.5" />
-                    <span>Pay with cash when your order is delivered. Please have the exact amount ready.</span>
-                  </div>
-                </motion.div>
-              )}
             </Section>
 
             {/* Notes */}
@@ -387,10 +368,8 @@ export default function CheckoutPage() {
                 <span className="flex items-center gap-2">
                   <span className="w-4 h-4 loader-ring" /> Processing...
                 </span>
-              ) : form.payment_method === 'mobile_money' ? (
-                `Pay ${formatPrice(total, currency)} with MoMo`
               ) : (
-                `Place Order — ${formatPrice(total, currency)}`
+                `Pay ${formatPrice(total, currency)} with MoMo`
               )}
             </button>
           </form>
@@ -448,15 +427,8 @@ export default function CheckoutPage() {
                     )}
                     <div className="flex justify-between text-sm">
                       <span className="text-neutral-400">Shipping</span>
-                      <span className={shippingCost === 0 ? 'text-success-400' : 'text-white'}>
-                        {shippingCost === 0 ? 'Free' : formatPrice(shippingCost, currency)}
-                      </span>
+                      <span className="text-success-400">Free</span>
                     </div>
-                    {shippingCost > 0 && (
-                      <p className="text-neutral-600 text-xs">
-                        Add {formatPrice(500 - subtotal, 'GHS')} more for free shipping
-                      </p>
-                    )}
                     <div className="flex justify-between font-semibold text-base pt-2 border-t border-white/10">
                       <span className="text-white">Total</span>
                       <span className="text-white">{formatPrice(total, currency)}</span>
