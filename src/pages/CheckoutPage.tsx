@@ -18,27 +18,6 @@ const PAYSTACK_KEY = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
 
 const REGIONS = ['Greater Accra', 'Ashanti', 'Central', 'Eastern', 'Western', 'Northern', 'Upper East', 'Upper West', 'Volta', 'Brong-Ahafo', 'Oti', 'Savanna', 'North East', 'Bono', 'Bono East', 'Ahafo', 'Western North'];
 
-// Shipping rates by region (GHS)
-const SHIPPING_RATES: Record<string, number> = {
-  'Greater Accra': 20,
-  'Ashanti': 35,
-  'Central': 30,
-  'Eastern': 30,
-  'Western': 40,
-  'Northern': 50,
-  'Upper East': 55,
-  'Upper West': 55,
-  'Volta': 35,
-  'Brong-Ahafo': 40,
-  'Oti': 45,
-  'Savanna': 50,
-  'North East': 55,
-  'Bono': 40,
-  'Bono East': 45,
-  'Ahafo': 40,
-  'Western North': 45,
-};
-
 const PAYMENT_METHODS: { value: PaymentMethod; label: string; desc: string; icon: React.FC<any>; disabled?: boolean }[] = [
   { value: 'mobile_money', label: 'Mobile Money', desc: 'MTN MoMo, Vodafone Cash, AirtelTigo Money', icon: Smartphone },
 ];
@@ -65,9 +44,9 @@ export default function CheckoutPage() {
   const [orderSummaryOpen, setOrderSummaryOpen] = useState(false);
   const [paymentError, setPaymentError] = useState('');
 
-  const shippingCost = form.shipping_address.region ? (SHIPPING_RATES[form.shipping_address.region] || 40) : 0;
+  const shippingCost = 0;
   const discountAmount = discountResult?.amount || 0;
-  const total = subtotal - discountAmount + shippingCost;
+  const total = subtotal - discountAmount;
 
   const update = (field: string, value: string) => {
     setForm(prev => ({ ...prev, [field]: value }));
@@ -448,15 +427,8 @@ export default function CheckoutPage() {
                     )}
                     <div className="flex justify-between text-sm">
                       <span className="text-neutral-400">Shipping</span>
-                      <span className="text-white">
-                        {form.shipping_address.region ? formatPrice(shippingCost, currency) : 'Select region'}
-                      </span>
+                      <span className="text-neutral-400 text-xs">Calculated based on your location</span>
                     </div>
-                    {!form.shipping_address.region && (
-                      <p className="text-neutral-600 text-xs">
-                        Shipping is calculated based on your region
-                      </p>
-                    )}
                     <div className="flex justify-between font-semibold text-base pt-2 border-t border-white/10">
                       <span className="text-white">Total</span>
                       <span className="text-white">{formatPrice(total, currency)}</span>
