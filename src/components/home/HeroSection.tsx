@@ -5,15 +5,6 @@ import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const slides = [
   {
-    image: '/images/hero/hero-shades-1.jpg',
-    headline: 'Explore',
-    highlight: 'Fashion',
-    sub: 'Bags, shoes, shades, jewelry, hair bands — complete your look with pieces that turn heads.',
-    cta: 'Shop Fashion',
-    link: '/products?category=fashion',
-    position: 'top center',
-  },
-  {
     image: '/images/hero/hero-fashion-1.jpeg',
     headline: 'Bold Frames,',
     highlight: 'Bold You',
@@ -21,15 +12,6 @@ const slides = [
     cta: 'Shop Shades',
     link: '/products?category=fashion',
     position: 'top center',
-  },
-  {
-    image: '/images/hero/hero-sofa-1.jpg',
-    headline: 'Discover',
-    highlight: 'ABBYHAUS',
-    sub: 'Premium furniture and home decor for your kitchen, living room, and bedroom.',
-    cta: 'Shop Home Decor',
-    link: '/products?category=abbyhaus',
-    position: 'center',
   },
   {
     image: '/images/hero/hero-fashion-2.jpeg',
@@ -41,29 +23,11 @@ const slides = [
     position: 'top center',
   },
   {
-    image: '/images/hero/hero-living-1.jpg',
-    headline: 'Elevate Your',
-    highlight: 'Living Space',
-    sub: 'Curated interiors that turn your house into a home. Modern designs, timeless comfort.',
-    cta: 'Explore Collection',
-    link: '/products?category=abbyhaus',
-    position: 'center',
-  },
-  {
     image: '/images/hero/hero-fashion-3.jpeg',
     headline: 'Classic White',
     highlight: 'Cat-Eye',
     sub: 'Timeless silhouettes with a modern edge. The perfect everyday statement piece.',
     cta: 'Shop Eyewear',
-    link: '/products?category=fashion',
-    position: 'top center',
-  },
-  {
-    image: '/images/hero/hero-glasses-1.jpg',
-    headline: 'See the World',
-    highlight: 'Differently',
-    sub: 'Fashion-forward eyewear and shades that make a statement. Frames for every face, every mood.',
-    cta: 'Shop Shades',
     link: '/products?category=fashion',
     position: 'top center',
   },
@@ -75,15 +39,6 @@ const slides = [
     cta: 'Shop Glasses',
     link: '/products?category=fashion',
     position: 'top center',
-  },
-  {
-    image: '/images/hero/hero-sofa-2.jpg',
-    headline: 'Welcome to',
-    highlight: 'ABBYKRISTA OUTLET',
-    sub: 'Your one-stop destination for home decor, fashion, accessories, and preorder deals.',
-    cta: 'Shop Now',
-    link: '/products',
-    position: 'center',
   },
 ];
 

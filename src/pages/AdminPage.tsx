@@ -182,7 +182,7 @@ function ProductsPanel() {
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
 
   function blankProduct() {
-    return { name: '', description: '', price: '', compare_at_price: '', category_id: '', stock_quantity: '', low_stock_threshold: '5', sku: '', images: '', tags: '', is_active: true, is_featured: false };
+    return { name: '', description: '', price: '', compare_at_price: '', category_id: '', stock_quantity: '', low_stock_threshold: '5', sku: '', images: '', tags: '', colors: '', is_active: true, is_featured: false };
   }
 
   const loadData = async () => {
@@ -214,6 +214,7 @@ function ProductsPanel() {
       category_id: p.category_id || '', stock_quantity: p.stock_quantity.toString(),
       low_stock_threshold: p.low_stock_threshold.toString(), sku: p.sku || '',
       images: p.images.join('\n'), tags: p.tags.join(', '),
+      colors: (p.colors || []).join(', '),
       is_active: p.is_active, is_featured: p.is_featured,
     });
     setImageFiles([]);
@@ -302,6 +303,7 @@ function ProductsPanel() {
       sku: form.sku || null,
       images: allImages,
       tags: form.tags.split(',').map(s => s.trim()).filter(Boolean),
+      colors: form.colors.split(',').map(s => s.trim()).filter(Boolean),
       is_active: form.is_active,
       is_featured: form.is_featured,
       updated_at: new Date().toISOString(),
@@ -370,7 +372,7 @@ function ProductsPanel() {
                     </td>
                     <td className="px-4 py-3">
                       <span className={`px-2 py-0.5 rounded-full text-xs ${p.is_active ? 'bg-success-500/10 text-success-400' : 'bg-neutral-800 text-neutral-500'}`}>
-                        {p.is_active ? 'Active' : 'Draft'}
+                        {p.is_active ? 'In Stock' : 'Draft'}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-right">
@@ -487,10 +489,16 @@ function ProductsPanel() {
                 <input value={form.tags} onChange={e => setForm(f => ({ ...f, tags: e.target.value }))} className="input-field text-sm" placeholder="shades, fashion, new arrival" />
               </div>
 
+              <div>
+                <label className="text-neutral-400 text-xs mb-1.5 block">Colors (comma-separated)</label>
+                <input value={form.colors} onChange={e => setForm(f => ({ ...f, colors: e.target.value }))} className="input-field text-sm" placeholder="Black, White, Pink, Beige" />
+                <p className="text-neutral-600 text-xs mt-1">Customers will pick from these on the product page. Leave blank for no color options.</p>
+              </div>
+
               <div className="flex gap-6">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input type="checkbox" checked={form.is_active} onChange={e => setForm(f => ({ ...f, is_active: e.target.checked }))} className="rounded" />
-                  <span className="text-neutral-300 text-sm">Active</span>
+                  <span className="text-neutral-300 text-sm">In Stock</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input type="checkbox" checked={form.is_featured} onChange={e => setForm(f => ({ ...f, is_featured: e.target.checked }))} className="rounded" />

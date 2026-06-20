@@ -21,6 +21,8 @@ export default function ProductDetailPage() {
   const [activeImage, setActiveImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
+  const [selectedColor, setSelectedColor] = useState('');
+  const [colorError, setColorError] = useState(false);
 
   useEffect(() => {
     if (!slug) return;
@@ -48,7 +50,11 @@ export default function ProductDetailPage() {
 
   const handleAddToCart = () => {
     if (!product) return;
-    addItem(product, quantity);
+    if (product.colors?.length && !selectedColor) {
+      setColorError(true);
+      return;
+    }
+    addItem(product, quantity, selectedColor || undefined);
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
   };
@@ -208,6 +214,41 @@ export default function ProductDetailPage() {
                     {tag}
                   </span>
                 ))}
+              </div>
+            )}
+
+            {/* Color selection */}
+            {product.colors?.length > 0 && (
+              <div className="mb-8">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-neutral-800 text-sm font-medium">Color</span>
+                  {selectedColor && (
+                    <span className="text-neutral-500 text-sm">— {selectedColor}</span>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {product.colors.map(color => (
+                    <button
+                      key={color}
+                      type="button"
+                      onClick={() => { setSelectedColor(color); setColorError(false); }}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-full border text-sm transition-all duration-200 ${
+                        selectedColor === color
+                          ? 'border-primary-500 bg-primary-50 text-primary-600'
+                          : 'border-neutral-300 text-neutral-600 hover:border-primary-300'
+                      }`}
+                    >
+                      <span
+                        className="w-4 h-4 rounded-full border border-neutral-300 shrink-0"
+                        style={{ backgroundColor: color.toLowerCase() }}
+                      />
+                      {color}
+                    </button>
+                  ))}
+                </div>
+                {colorError && (
+                  <p className="text-error-500 text-xs mt-2">Please select a color before adding to cart.</p>
+                )}
               </div>
             )}
 

@@ -23,6 +23,7 @@ export interface Product {
   is_active: boolean;
   is_featured: boolean;
   tags: string[];
+  colors: string[];
   weight: number | null;
   created_at: string;
   updated_at: string;
@@ -32,6 +33,7 @@ export interface Product {
 export interface CartItem {
   product: Product;
   quantity: number;
+  selectedColor?: string;
 }
 
 export interface Order {

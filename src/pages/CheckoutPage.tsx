@@ -121,7 +121,7 @@ export default function CheckoutPage() {
       items.map(item => ({
         order_id: order.id,
         product_id: item.product.id,
-        product_name: item.product.name,
+        product_name: item.selectedColor ? `${item.product.name} - ${item.selectedColor}` : item.product.name,
         product_image: item.product.images[0] || '',
         quantity: item.quantity,
         unit_price: item.product.price,
@@ -415,7 +415,7 @@ export default function CheckoutPage() {
                   {/* Items */}
                   <div className="space-y-3 max-h-64 overflow-y-auto">
                     {items.map(item => (
-                      <div key={item.product.id} className="flex gap-3">
+                      <div key={`${item.product.id}-${item.selectedColor || ''}`} className="flex gap-3">
                         <div className="w-12 h-12 rounded-lg overflow-hidden bg-neutral-800 shrink-0">
                           {item.product.images[0] && (
                             <img src={item.product.images[0]} alt="" className="w-full h-full object-cover" />
@@ -423,6 +423,9 @@ export default function CheckoutPage() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-white text-xs font-medium truncate">{item.product.name}</p>
+                          {item.selectedColor && (
+                            <p className="text-neutral-500 text-xs">Color: {item.selectedColor}</p>
+                          )}
                           <p className="text-neutral-500 text-xs">Qty: {item.quantity}</p>
                         </div>
                         <span className="text-white text-xs font-semibold shrink-0">

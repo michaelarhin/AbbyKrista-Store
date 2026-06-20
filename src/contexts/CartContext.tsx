@@ -3,9 +3,9 @@ import type { CartItem, Product } from '../types';
 
 interface CartContextType {
   items: CartItem[];
-  addItem: (product: Product, quantity?: number) => void;
-  removeItem: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
+  addItem: (product: Product, quantity?: number, selectedColor?: string) => void;
+  removeItem: (productId: string, selectedColor?: string) => void;
+  updateQuantity: (productId: string, quantity: number, selectedColor?: string) => void;
   clearCart: () => void;
   totalItems: number;
   subtotal: number;
@@ -27,32 +27,32 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('luxe_cart', JSON.stringify(items));
   }, [items]);
 
-  const addItem = (product: Product, quantity = 1) => {
+  const addItem = (product: Product, quantity = 1, selectedColor?: string) => {
     setItems(prev => {
-      const existing = prev.find(i => i.product.id === product.id);
+      const existing = prev.find(i => i.product.id === product.id && i.selectedColor === selectedColor);
       if (existing) {
         return prev.map(i =>
-          i.product.id === product.id
+          i.product.id === product.id && i.selectedColor === selectedColor
             ? { ...i, quantity: Math.min(i.quantity + quantity, product.stock_quantity) }
             : i
         );
       }
-      return [...prev, { product, quantity: Math.min(quantity, product.stock_quantity) }];
+      return [...prev, { product, quantity: Math.min(quantity, product.stock_quantity), selectedColor }];
     });
   };
 
-  const removeItem = (productId: string) => {
-    setItems(prev => prev.filter(i => i.product.id !== productId));
+  const removeItem = (productId: string, selectedColor?: string) => {
+    setItems(prev => prev.filter(i => !(i.product.id === productId && i.selectedColor === selectedColor)));
   };
 
-  const updateQuantity = (productId: string, quantity: number) => {
+  const updateQuantity = (productId: string, quantity: number, selectedColor?: string) => {
     if (quantity <= 0) {
-      removeItem(productId);
+      removeItem(productId, selectedColor);
       return;
     }
     setItems(prev =>
       prev.map(i =>
-        i.product.id === productId
+        i.product.id === productId && i.selectedColor === selectedColor
           ? { ...i, quantity: Math.min(quantity, i.product.stock_quantity) }
           : i
       )
