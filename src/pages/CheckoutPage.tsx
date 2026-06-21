@@ -134,6 +134,15 @@ export default function CheckoutPage() {
       console.error('Order items save error:', itemsError);
     }
 
+    // Reduce stock quantity for each purchased item
+    for (const item of items) {
+      const newQuantity = Math.max(0, item.product.stock_quantity - item.quantity);
+      await supabase
+        .from('products')
+        .update({ stock_quantity: newQuantity })
+        .eq('id', item.product.id);
+    }
+
     if (discountResult) {
       // Attempt to increment discount usage — may fail for anon users due to RLS, which is okay
       try {

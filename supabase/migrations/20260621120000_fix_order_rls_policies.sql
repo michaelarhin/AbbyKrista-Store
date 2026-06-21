@@ -43,3 +43,10 @@ CREATE POLICY "anon_update_discount_usage"
   TO anon, authenticated
   USING (true)
   WITH CHECK (true);
+
+-- Allow anon to update product stock (for decrementing after purchase)
+CREATE POLICY "anon_update_product_stock"
+  ON products FOR UPDATE
+  TO anon
+  USING (true)
+  WITH CHECK (true);
