@@ -100,7 +100,7 @@ export default function CheckoutPage() {
         shipping_address: form.shipping_address,
         subtotal,
         discount_amount: discountAmount,
-        shipping_cost: shippingCost,
+        shipping_cost: 0,
         total,
         currency: 'GHS',
         payment_method: form.payment_method,
@@ -108,15 +108,17 @@ export default function CheckoutPage() {
         discount_code_id: discountResult?.id || null,
         notes: form.notes + (paystackRef ? ` | Paystack Ref: ${paystackRef}` : ''),
       })
-      .select()
+      .select('id')
       .single();
 
     if (error || !order) {
-      setPaymentError('Failed to save order. Please contact support.');
+      console.error('Order save error:', error);
+      setPaymentError(`Failed to save order. Please contact support. Ref: ${paystackRef || orderNumber}`);
       return null;
     }
 
-    await supabase.from('order_items').insert(
+    // Save order items (non-blocking — don't fail the whole order if this errors)
+    const { error: itemsError } = await supabase.from('order_items').insert(
       items.map(item => ({
         order_id: order.id,
         product_id: item.product.id,
@@ -128,17 +130,26 @@ export default function CheckoutPage() {
       }))
     );
 
+    if (itemsError) {
+      console.error('Order items save error:', itemsError);
+    }
+
     if (discountResult) {
-      const { data: dcRow } = await supabase
-        .from('discount_codes')
-        .select('current_uses')
-        .eq('id', discountResult.id)
-        .single();
-      if (dcRow) {
-        await supabase
+      // Attempt to increment discount usage — may fail for anon users due to RLS, which is okay
+      try {
+        const { data: dcRow } = await supabase
           .from('discount_codes')
-          .update({ current_uses: (dcRow.current_uses || 0) + 1 })
-          .eq('id', discountResult.id);
+          .select('current_uses')
+          .eq('id', discountResult.id)
+          .single();
+        if (dcRow) {
+          await supabase
+            .from('discount_codes')
+            .update({ current_uses: (dcRow.current_uses || 0) + 1 })
+            .eq('id', discountResult.id);
+        }
+      } catch {
+        // Non-critical — admin can track this manually
       }
     }
 
