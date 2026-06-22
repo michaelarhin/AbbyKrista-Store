@@ -739,7 +739,7 @@ function OrdersPanel() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-white/5">
-                  {['Order', 'Customer', 'Total', 'Payment', 'Status', 'Date', ''].map(h => (
+                  {['Order', 'Customer', 'Items', 'Total', 'Payment', 'Status', 'Date', ''].map(h => (
                     <th key={h} className="text-left text-neutral-500 text-xs px-4 py-3 font-medium">{h}</th>
                   ))}
                 </tr>
@@ -751,6 +751,19 @@ function OrdersPanel() {
                     <td className="px-4 py-3">
                       <p className="text-neutral-200 text-xs">{order.customer_name}</p>
                       <p className="text-neutral-600 text-xs">{order.customer_email}</p>
+                    </td>
+                    <td className="px-4 py-3">
+                      {(order.order_items || []).length > 0 ? (
+                        <div className="space-y-0.5">
+                          {(order.order_items || []).map((item: any) => (
+                            <p key={item.id} className="text-neutral-300 text-xs truncate max-w-48">
+                              {item.product_name} × {item.quantity}
+                            </p>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-neutral-600 text-xs italic">No items</span>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-white text-xs">{formatPrice(order.total, 'GHS')}</td>
                     <td className="px-4 py-3">
@@ -776,7 +789,7 @@ function OrdersPanel() {
                   </tr>
                 ))}
                 {orders.length === 0 && (
-                  <tr><td colSpan={7} className="px-4 py-8 text-center text-neutral-600 text-sm">No orders yet</td></tr>
+                  <tr><td colSpan={8} className="px-4 py-8 text-center text-neutral-600 text-sm">No orders yet</td></tr>
                 )}
               </tbody>
             </table>
@@ -801,14 +814,36 @@ function OrdersPanel() {
                 />
               )}
               <div className="border-t border-white/10 pt-4">
-                <p className="text-neutral-500 text-xs mb-3">Items</p>
-                {(selected.order_items || []).map((item: any) => (
-                  <div key={item.id} className="flex justify-between text-xs py-2 border-b border-white/5">
-                    <span className="text-neutral-300">{item.product_name} × {item.quantity}</span>
-                    <span className="text-white">{formatPrice(item.total_price, 'GHS')}</span>
-                  </div>
-                ))}
-                <div className="flex justify-between text-sm font-semibold mt-3">
+                <p className="text-neutral-500 text-xs mb-3">Items Ordered</p>
+                {(selected.order_items || []).length === 0 ? (
+                  <p className="text-neutral-600 text-xs italic">No item details recorded for this order. This may be from before the system fix.</p>
+                ) : (
+                  (selected.order_items || []).map((item: any) => {
+                    // Parse color from product name (format: "Product Name - Color")
+                    const parts = item.product_name.split(' - ');
+                    const productName = parts[0];
+                    const color = parts.length > 1 ? parts.slice(1).join(' - ') : null;
+
+                    return (
+                      <div key={item.id} className="py-3 border-b border-white/5 last:border-0">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <p className="text-neutral-200 text-sm font-medium">{productName}</p>
+                            <div className="flex gap-3 mt-1">
+                              {color && (
+                                <span className="text-xs text-primary-400">Color: {color}</span>
+                              )}
+                              <span className="text-xs text-neutral-500">Qty: {item.quantity}</span>
+                              <span className="text-xs text-neutral-500">@ {formatPrice(item.unit_price, 'GHS')} each</span>
+                            </div>
+                          </div>
+                          <span className="text-white text-sm font-medium">{formatPrice(item.total_price, 'GHS')}</span>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+                <div className="flex justify-between text-sm font-semibold mt-4 pt-3 border-t border-white/10">
                   <span className="text-white">Total</span>
                   <span className="text-white">{formatPrice(selected.total, 'GHS')}</span>
                 </div>
