@@ -50,3 +50,10 @@ CREATE POLICY "anon_update_product_stock"
   TO anon
   USING (true)
   WITH CHECK (true);
+
+-- Allow anon to update order payment status after successful payment
+CREATE POLICY "anon_update_orders"
+  ON orders FOR UPDATE
+  TO anon
+  USING (true)
+  WITH CHECK (true);

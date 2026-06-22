@@ -87,7 +87,16 @@ export default function CheckoutPage() {
     setCheckingDiscount(false);
   };
 
-  const saveOrder = async (paymentStatus: string, paystackRef?: string) => {
+  const saveOrder = async (paymentStatus: string, paystackRef?: string, orderId?: string) => {
+    // If we already have an order ID, just update the payment status
+    if (orderId) {
+      await supabase
+        .from('orders')
+        .update({ payment_status: paymentStatus, notes: paystackRef ? `Paystack Ref: ${paystackRef}` : '' })
+        .eq('id', orderId);
+      return orderId;
+    }
+
     const orderNumber = `AK-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
 
     const { data: order, error } = await supabase
@@ -106,18 +115,18 @@ export default function CheckoutPage() {
         payment_method: form.payment_method,
         payment_status: paymentStatus,
         discount_code_id: discountResult?.id || null,
-        notes: form.notes + (paystackRef ? ` | Paystack Ref: ${paystackRef}` : ''),
+        notes: form.notes,
       })
-      .select('id')
+      .select('id, order_number')
       .single();
 
     if (error || !order) {
       console.error('Order save error:', error);
-      setPaymentError(`Failed to save order. Please contact support. Ref: ${paystackRef || orderNumber}`);
+      setPaymentError('Failed to create order. Please try again or contact support.');
       return null;
     }
 
-    // Save order items (non-blocking — don't fail the whole order if this errors)
+    // Save order items
     const { error: itemsError } = await supabase.from('order_items').insert(
       items.map(item => ({
         order_id: order.id,
@@ -144,7 +153,6 @@ export default function CheckoutPage() {
     }
 
     if (discountResult) {
-      // Attempt to increment discount usage — may fail for anon users due to RLS, which is okay
       try {
         const { data: dcRow } = await supabase
           .from('discount_codes')
@@ -158,29 +166,38 @@ export default function CheckoutPage() {
             .eq('id', discountResult.id);
         }
       } catch {
-        // Non-critical — admin can track this manually
+        // Non-critical
       }
     }
 
-    return orderNumber;
+    return order.order_number;
   };
 
-  const initiatePaystackPayment = () => {
+  const initiatePaystackPayment = async () => {
     if (!window.PaystackPop) {
       setPaymentError('Payment system is loading. Please try again.');
       setSubmitting(false);
       return;
     }
 
+    // Step 1: Save order as "pending" FIRST — before payment
+    const orderNumber = await saveOrder('pending');
+    if (!orderNumber) {
+      setSubmitting(false);
+      return;
+    }
+
+    // Step 2: Open Paystack payment
     const handler = window.PaystackPop.setup({
       key: PAYSTACK_KEY,
       email: form.customer_email,
-      amount: Math.round(total * 100), // Paystack expects amount in pesewas
+      amount: Math.round(total * 100),
       currency: 'GHS',
-      channels: ['mobile_money'], // MoMo only
+      channels: ['mobile_money'],
       metadata: {
         customer_name: form.customer_name,
         customer_phone: form.customer_phone,
+        order_number: orderNumber,
         custom_fields: [
           {
             display_name: 'Customer Name',
@@ -192,19 +209,27 @@ export default function CheckoutPage() {
             variable_name: 'phone',
             value: form.customer_phone,
           },
+          {
+            display_name: 'Order Number',
+            variable_name: 'order_number',
+            value: orderNumber,
+          },
         ],
       },
       onSuccess: async (response: { reference: string }) => {
-        // Payment successful — save order
-        const orderNumber = await saveOrder('paid', response.reference);
-        if (orderNumber) {
-          clearCart();
-          setOrderSuccess(orderNumber);
-        }
+        // Step 3: Update order to "paid"
+        await supabase
+          .from('orders')
+          .update({ payment_status: 'paid', notes: `Paystack Ref: ${response.reference}` })
+          .eq('order_number', orderNumber);
+
+        clearCart();
+        setOrderSuccess(orderNumber);
         setSubmitting(false);
       },
       onCancel: () => {
-        setPaymentError('Payment was cancelled. Please try again.');
+        // Order stays as "pending" in database — admin can see it was attempted
+        setPaymentError('Payment was cancelled. Your order has been saved — please try paying again or contact us.');
         setSubmitting(false);
       },
     });
@@ -220,10 +245,10 @@ export default function CheckoutPage() {
 
     if (form.payment_method === 'mobile_money') {
       // Use Paystack for mobile money
-      initiatePaystackPayment();
+      await initiatePaystackPayment();
     } else {
       // Fallback — should not happen since only mobile money is available
-      initiatePaystackPayment();
+      await initiatePaystackPayment();
     }
   };
 
