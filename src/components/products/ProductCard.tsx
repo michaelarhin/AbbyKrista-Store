@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import type { Product } from '../../types';
 import { useCurrency } from '../../contexts/CurrencyContext';
@@ -15,6 +15,7 @@ interface ProductCardProps {
 export default function ProductCard({ product, index }: ProductCardProps) {
   const { currency } = useCurrency();
   const { addItem } = useCart();
+  const navigate = useNavigate();
   const [hovered, setHovered] = useState(false);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const cardRef = useRef<HTMLDivElement>(null);
@@ -35,6 +36,11 @@ export default function ProductCard({ product, index }: ProductCardProps) {
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
+    // If product has colors, redirect to product page for color selection
+    if (product.colors && product.colors.length > 0) {
+      navigate(`/products/${product.slug}`);
+      return;
+    }
     addItem(product);
     setAdded(true);
     setTimeout(() => setAdded(false), 1500);
@@ -118,7 +124,7 @@ export default function ProductCard({ product, index }: ProductCardProps) {
               disabled={isOutOfStock}
               className="absolute bottom-4 left-4 right-4 btn-primary text-xs py-2.5 justify-center disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {added ? 'Added!' : isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
+              {added ? 'Added!' : isOutOfStock ? 'Out of Stock' : (product.colors && product.colors.length > 0) ? 'Select Options' : 'Add to Cart'}
             </motion.button>
           </div>
 
