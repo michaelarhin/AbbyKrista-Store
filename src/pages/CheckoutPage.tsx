@@ -43,6 +43,7 @@ export default function CheckoutPage() {
   const [orderSuccess, setOrderSuccess] = useState<string | null>(null);
   const [orderSummaryOpen, setOrderSummaryOpen] = useState(false);
   const [paymentError, setPaymentError] = useState('');
+  const [pendingOrderNumber, setPendingOrderNumber] = useState<string | null>(null);
 
   const shippingCost = 0;
   const discountAmount = discountResult?.amount || 0;
@@ -180,11 +181,16 @@ export default function CheckoutPage() {
       return;
     }
 
-    // Step 1: Save order as "pending" FIRST — before payment
-    const orderNumber = await saveOrder('pending');
+    // Prevent duplicate orders — reuse pending order if one exists
+    let orderNumber = pendingOrderNumber;
     if (!orderNumber) {
-      setSubmitting(false);
-      return;
+      // Step 1: Save order as "pending" FIRST — before payment
+      orderNumber = await saveOrder('pending');
+      if (!orderNumber) {
+        setSubmitting(false);
+        return;
+      }
+      setPendingOrderNumber(orderNumber);
     }
 
     // Step 2: Open Paystack payment
@@ -224,7 +230,8 @@ export default function CheckoutPage() {
           .eq('order_number', orderNumber);
 
         clearCart();
-        setOrderSuccess(orderNumber);
+        setPendingOrderNumber(null);
+        setOrderSuccess(orderNumber!);
         setSubmitting(false);
       },
       onCancel: () => {
