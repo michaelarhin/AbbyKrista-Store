@@ -139,9 +139,9 @@ export default function HeroSection() {
         </motion.div>
       </AnimatePresence>
 
-      {/* Overlay gradient */}
-      <div className="absolute inset-0 bg-gradient-to-r from-neutral-950/80 via-neutral-950/50 to-neutral-950/30 z-[2]" />
-      <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/70 via-transparent to-neutral-950/30 z-[2]" />
+      {/* Overlay gradient — soft blush on left for text readability */}
+      <div className="absolute inset-0 z-[2]" style={{ background: 'linear-gradient(to right, rgba(255,249,249,0.88) 0%, rgba(255,249,249,0.6) 45%, rgba(255,249,249,0.05) 100%)' }} />
+      <div className="absolute inset-0 z-[2]" style={{ background: 'linear-gradient(to top, rgba(255,249,249,0.45) 0%, transparent 55%)' }} />
 
       {/* Content */}
       <div className="relative z-10 h-full flex items-center">
@@ -150,26 +150,15 @@ export default function HeroSection() {
             {/* Slide indicator dots */}
             <div className="flex gap-2 mb-8">
               {slides.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => {
-                    setDirection(i > current ? 1 : -1);
-                    setCurrent(i);
-                  }}
-                  className="group relative"
-                  aria-label={`Go to slide ${i + 1}`}
-                >
-                  <div className={`h-1 rounded-full transition-all duration-500 ${
-                    i === current ? 'w-10 bg-primary-500' : 'w-3 bg-neutral-300 group-hover:bg-neutral-400'
-                  }`} />
-                  {/* Progress bar for active slide */}
+                <button key={i} onClick={() => { setDirection(i > current ? 1 : -1); setCurrent(i); }}
+                  className="group relative" aria-label={`Go to slide ${i + 1}`}>
+                  <div className="h-1 rounded-full transition-all duration-500"
+                    style={{ width: i === current ? '40px' : '12px', backgroundColor: i === current ? '#d4708a' : 'rgba(212,112,138,0.35)' }} />
                   {i === current && (
-                    <motion.div
-                      initial={{ scaleX: 0 }}
-                      animate={{ scaleX: 1 }}
+                    <motion.div initial={{ scaleX: 0 }} animate={{ scaleX: 1 }}
                       transition={{ duration: 5, ease: 'linear' }}
-                      className="absolute inset-0 h-1 rounded-full bg-primary-400 origin-left"
-                    />
+                      className="absolute inset-0 h-1 rounded-full origin-left"
+                      style={{ backgroundColor: '#f87da0' }} />
                   )}
                 </button>
               ))}
@@ -177,27 +166,22 @@ export default function HeroSection() {
 
             {/* Text content with transitions */}
             <AnimatePresence mode="wait">
-              <motion.div
-                key={current}
-                variants={textVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{ duration: 0.6, ease: [0.25, 0.4, 0.25, 1] }}
-              >
+              <motion.div key={current} variants={textVariants} initial="enter" animate="center" exit="exit"
+                transition={{ duration: 0.6, ease: [0.25, 0.4, 0.25, 1] }}>
                 {/* Eyebrow */}
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary-200 bg-white/70 backdrop-blur-sm text-xs text-primary-600 tracking-widest uppercase mb-6">
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary-400 animate-pulse" />
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border backdrop-blur-sm text-xs tracking-widest uppercase mb-6"
+                  style={{ borderColor: '#fbd5d9', background: 'rgba(255,255,255,0.75)', color: '#d4708a' }}>
+                  <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: '#d4708a' }} />
                   ABBYKRISTA OUTLET
                 </div>
 
                 <h1 className="font-display text-5xl md:text-7xl lg:text-8xl font-semibold tracking-tight leading-none mb-6">
-                  <span className="text-neutral-200">{slide.headline}</span>
+                  <span className="text-neutral-800 drop-shadow-sm">{slide.headline}</span>
                   <br />
                   <span className="text-gradient">{slide.highlight}</span>
                 </h1>
 
-                <p className="text-neutral-300 text-lg md:text-xl leading-relaxed mb-10 max-w-lg">
+                <p className="text-neutral-600 text-lg md:text-xl leading-relaxed mb-10 max-w-lg drop-shadow-sm">
                   {slide.sub}
                 </p>
 
@@ -216,29 +200,27 @@ export default function HeroSection() {
       </div>
 
       {/* Navigation arrows */}
-      <button
-        onClick={prev}
-        aria-label="Previous slide"
-        className="absolute left-4 sm:left-8 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full border border-neutral-200 bg-white/60 backdrop-blur-sm flex items-center justify-center text-neutral-500 hover:text-primary-500 hover:border-primary-300 hover:bg-white/80 transition-all duration-300"
-      >
+      <button onClick={prev} aria-label="Previous slide"
+        className="absolute left-4 sm:left-8 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full backdrop-blur-sm flex items-center justify-center transition-all duration-300"
+        style={{ border: '1.5px solid #fbd5d9', background: 'rgba(255,255,255,0.7)', color: '#7a7a7a' }}
+        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#d4708a'; (e.currentTarget as HTMLElement).style.borderColor = '#d4708a'; }}
+        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = '#7a7a7a'; (e.currentTarget as HTMLElement).style.borderColor = '#fbd5d9'; }}>
         <ChevronLeft size={20} />
       </button>
-      <button
-        onClick={next}
-        aria-label="Next slide"
-        className="absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full border border-neutral-200 bg-white/60 backdrop-blur-sm flex items-center justify-center text-neutral-500 hover:text-primary-500 hover:border-primary-300 hover:bg-white/80 transition-all duration-300"
-      >
+      <button onClick={next} aria-label="Next slide"
+        className="absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full backdrop-blur-sm flex items-center justify-center transition-all duration-300"
+        style={{ border: '1.5px solid #fbd5d9', background: 'rgba(255,255,255,0.7)', color: '#7a7a7a' }}
+        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#d4708a'; (e.currentTarget as HTMLElement).style.borderColor = '#d4708a'; }}
+        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = '#7a7a7a'; (e.currentTarget as HTMLElement).style.borderColor = '#fbd5d9'; }}>
+
         <ChevronRight size={20} />
       </button>
 
       {/* Scroll indicator */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-10">
-        <span className="text-neutral-500 text-xs tracking-widest uppercase">Scroll</span>
-        <motion.div
-          animate={{ y: [0, 6, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-          className="w-px h-8 bg-gradient-to-b from-primary-400 to-transparent"
-        />
+        <span className="text-xs tracking-widest uppercase" style={{ color: '#d4708a' }}>Scroll</span>
+        <motion.div animate={{ y: [0, 6, 0] }} transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+          className="w-px h-8" style={{ background: 'linear-gradient(to bottom, #d4708a, transparent)' }} />
       </div>
     </section>
   );
