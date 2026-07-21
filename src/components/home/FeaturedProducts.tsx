@@ -32,7 +32,7 @@ export default function FeaturedProducts() {
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <p className="text-primary-400 text-xs font-medium tracking-widest uppercase mb-3">Handpicked for You</p>
+          <p className="text-primary-500 text-xs font-medium tracking-widest uppercase mb-3">Handpicked for You</p>
           <h2 className="section-heading">Featured Products</h2>
         </motion.div>
 
@@ -51,7 +51,7 @@ export default function FeaturedProducts() {
       {loading ? (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="aspect-[3/4] rounded-2xl bg-neutral-900 shimmer-bg animate-shimmer" />
+            <div key={i} className="aspect-[3/4] rounded-2xl bg-cream-200 shimmer-bg animate-shimmer" />
           ))}
         </div>
       ) : (

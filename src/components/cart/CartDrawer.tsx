@@ -70,9 +70,9 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
-                className="flex gap-4 p-3 rounded-xl bg-neutral-50 border border-neutral-100"
+                className="flex gap-4 p-3 rounded-xl bg-cream-50 border border-cream-200"
               >
-                <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-neutral-100">
+                <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-cream-100">
                   {item.product.images[0] && (
                     <img
                       src={`${item.product.images[0]}?auto=compress&w=128`}
@@ -93,7 +93,7 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
                     <button
                       onClick={() => updateQuantity(item.product.id, item.quantity - 1, item.selectedColor)}
                       aria-label="Decrease quantity"
-                      className="w-6 h-6 rounded-md bg-neutral-200 flex items-center justify-center hover:bg-neutral-300 transition-colors text-neutral-600"
+                      className="w-6 h-6 rounded-md bg-cream-200 flex items-center justify-center hover:bg-cream-300 transition-colors text-neutral-600"
                     >
                       <Minus size={12} />
                     </button>
@@ -101,7 +101,7 @@ export default function CartDrawer({ open, onClose }: CartDrawerProps) {
                     <button
                       onClick={() => updateQuantity(item.product.id, item.quantity + 1, item.selectedColor)}
                       aria-label="Increase quantity"
-                      className="w-6 h-6 rounded-md bg-neutral-200 flex items-center justify-center hover:bg-neutral-300 transition-colors text-neutral-600"
+                      className="w-6 h-6 rounded-md bg-cream-200 flex items-center justify-center hover:bg-cream-300 transition-colors text-neutral-600"
                     >
                       <Plus size={12} />
                     </button>

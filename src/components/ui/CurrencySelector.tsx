@@ -22,7 +22,7 @@ export default function CurrencySelector() {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1.5 text-sm text-neutral-400 hover:text-white transition-colors px-2 py-1.5 rounded-lg hover:bg-white/5"
+        className="flex items-center gap-1.5 text-sm text-neutral-500 hover:text-neutral-800 transition-colors px-2 py-1.5 rounded-lg hover:bg-cream-50"
       >
         <span className="font-medium">{CURRENCIES[currency].symbol}</span>
         <span className="hidden sm:inline text-xs">{currency}</span>
@@ -36,7 +36,7 @@ export default function CurrencySelector() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.95 }}
             transition={{ duration: 0.15 }}
-            className="absolute right-0 top-full mt-2 w-52 glass-dark rounded-xl overflow-hidden shadow-2xl z-50"
+            className="absolute right-0 top-full mt-2 w-52 bg-white border border-primary-100 rounded-xl overflow-hidden shadow-2xl z-50"
           >
             {(Object.keys(CURRENCIES) as Currency[]).map(c => (
               <button
@@ -44,15 +44,15 @@ export default function CurrencySelector() {
                 onClick={() => { setCurrency(c); setOpen(false); }}
                 className={`w-full flex items-center justify-between px-4 py-2.5 text-sm transition-colors ${
                   c === currency
-                    ? 'bg-white/10 text-white'
-                    : 'text-neutral-400 hover:bg-white/5 hover:text-white'
+                    ? 'bg-primary-50 text-primary-600'
+                    : 'text-neutral-500 hover:bg-cream-50 hover:text-neutral-800'
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <span className="w-6 text-center font-medium text-white/70">{CURRENCIES[c].symbol}</span>
+                  <span className="w-6 text-center font-medium text-neutral-700">{CURRENCIES[c].symbol}</span>
                   <span>{CURRENCIES[c].name}</span>
                 </div>
-                <span className="text-xs text-neutral-600">{c}</span>
+                <span className="text-xs text-neutral-400">{c}</span>
               </button>
             ))}
           </motion.div>

@@ -160,7 +160,7 @@ export default function HeroSection() {
                   aria-label={`Go to slide ${i + 1}`}
                 >
                   <div className={`h-1 rounded-full transition-all duration-500 ${
-                    i === current ? 'w-10 bg-white' : 'w-3 bg-white/30 group-hover:bg-white/50'
+                    i === current ? 'w-10 bg-primary-500' : 'w-3 bg-neutral-300 group-hover:bg-neutral-400'
                   }`} />
                   {/* Progress bar for active slide */}
                   {i === current && (
@@ -186,7 +186,7 @@ export default function HeroSection() {
                 transition={{ duration: 0.6, ease: [0.25, 0.4, 0.25, 1] }}
               >
                 {/* Eyebrow */}
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/20 bg-white/5 backdrop-blur-sm text-xs text-neutral-300 tracking-widest uppercase mb-6">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary-200 bg-white/70 backdrop-blur-sm text-xs text-primary-600 tracking-widest uppercase mb-6">
                   <span className="w-1.5 h-1.5 rounded-full bg-primary-400 animate-pulse" />
                   ABBYKRISTA OUTLET
                 </div>
@@ -219,25 +219,25 @@ export default function HeroSection() {
       <button
         onClick={prev}
         aria-label="Previous slide"
-        className="absolute left-4 sm:left-8 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full border border-white/20 bg-black/20 backdrop-blur-sm flex items-center justify-center text-white/70 hover:text-white hover:border-white/40 hover:bg-black/40 transition-all duration-300"
+        className="absolute left-4 sm:left-8 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full border border-neutral-200 bg-white/60 backdrop-blur-sm flex items-center justify-center text-neutral-500 hover:text-primary-500 hover:border-primary-300 hover:bg-white/80 transition-all duration-300"
       >
         <ChevronLeft size={20} />
       </button>
       <button
         onClick={next}
         aria-label="Next slide"
-        className="absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full border border-white/20 bg-black/20 backdrop-blur-sm flex items-center justify-center text-white/70 hover:text-white hover:border-white/40 hover:bg-black/40 transition-all duration-300"
+        className="absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full border border-neutral-200 bg-white/60 backdrop-blur-sm flex items-center justify-center text-neutral-500 hover:text-primary-500 hover:border-primary-300 hover:bg-white/80 transition-all duration-300"
       >
         <ChevronRight size={20} />
       </button>
 
       {/* Scroll indicator */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-10">
-        <span className="text-neutral-400 text-xs tracking-widest uppercase">Scroll</span>
+        <span className="text-neutral-500 text-xs tracking-widest uppercase">Scroll</span>
         <motion.div
           animate={{ y: [0, 6, 0] }}
           transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-          className="w-px h-8 bg-gradient-to-b from-white/60 to-transparent"
+          className="w-px h-8 bg-gradient-to-b from-primary-400 to-transparent"
         />
       </div>
     </section>

@@ -25,7 +25,7 @@ export default function CategorySection() {
   const filtered = categories.filter(cat => ALLOWED_SLUGS.includes(cat.slug));
 
   return (
-    <section className="py-24 bg-neutral-900/50">
+    <section className="py-24 bg-cream-100/60">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -34,7 +34,7 @@ export default function CategorySection() {
           transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
-          <p className="text-primary-400 text-xs font-medium tracking-widest uppercase mb-3">Our Collections</p>
+          <p className="text-primary-500 text-xs font-medium tracking-widest uppercase mb-3">Our Collections</p>
           <h2 className="section-heading">Shop by Category</h2>
           <p className="text-neutral-400 text-base mt-4 max-w-lg mx-auto">
             Home decor, fashion, accessories, gadgets, and exclusive preorder drops — all in one outlet.
@@ -44,7 +44,7 @@ export default function CategorySection() {
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(5)].map((_, i) => (
-              <div key={i} className="aspect-[3/4] rounded-3xl bg-neutral-800 shimmer-bg" />
+              <div key={i} className="aspect-[3/4] rounded-3xl bg-cream-200 shimmer-bg" />
             ))}
           </div>
         ) : filtered.length > 0 ? (
@@ -59,7 +59,7 @@ export default function CategorySection() {
               >
                 <Link
                   to={`/products?category=${cat.slug}`}
-                  className="relative group block rounded-3xl overflow-hidden aspect-[3/4] bg-neutral-800"
+                  className="relative group block rounded-3xl overflow-hidden aspect-[3/4] bg-cream-100"
                 >
                   {cat.image_url ? (
                     <img
@@ -68,8 +68,8 @@ export default function CategorySection() {
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
                   ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-neutral-800 to-neutral-900 flex items-center justify-center">
-                      <span className="text-neutral-600 text-sm">No image</span>
+                    <div className="w-full h-full bg-gradient-to-br from-primary-100 to-cream-200 flex items-center justify-center">
+                      <span className="text-neutral-500 text-sm">No image</span>
                     </div>
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/90 via-neutral-950/40 to-transparent group-hover:from-neutral-950/95 transition-all duration-300" />
@@ -91,7 +91,7 @@ export default function CategorySection() {
         ) : (
           <div className="text-center py-12 text-neutral-500 text-sm">
             <p>No categories found. Add categories in the admin panel to see them here.</p>
-            <Link to="/admin" className="text-primary-400 hover:text-primary-300 mt-2 inline-block">Go to Admin →</Link>
+            <Link to="/admin" className="text-primary-500 hover:text-primary-600 mt-2 inline-block">Go to Admin →</Link>
           </div>
         )}
       </div>
