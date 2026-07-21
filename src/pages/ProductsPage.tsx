@@ -87,7 +87,7 @@ export default function ProductsPage() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <h1 className="font-display text-4xl md:text-5xl font-semibold text-white mb-2">{title}</h1>
+          <h1 className="font-display text-4xl md:text-5xl font-semibold text-neutral-900 mb-2">{title}</h1>
           <p className="text-neutral-500 text-sm">{loading ? '—' : `${products.length} products`}</p>
         </motion.div>
 
@@ -96,8 +96,9 @@ export default function ProductsPage() {
           <button
             onClick={() => setCategory('')}
             className={`shrink-0 px-4 py-2 rounded-full text-sm transition-all duration-200 ${
-              !categorySlug ? 'bg-white text-neutral-950 font-medium' : 'border border-white/10 text-neutral-400 hover:border-white/30 hover:text-white'
+              !categorySlug ? 'font-medium' : 'border border-neutral-200 text-neutral-600 hover:border-neutral-300'
             }`}
+            style={!categorySlug ? { backgroundColor: '#d4708a', color: 'white' } : undefined}
           >
             All
           </button>
@@ -108,8 +109,9 @@ export default function ProductsPage() {
               key={cat.id}
               onClick={() => setCategory(cat.slug)}
               className={`shrink-0 px-4 py-2 rounded-full text-sm transition-all duration-200 ${
-                categorySlug === cat.slug ? 'bg-white text-neutral-950 font-medium' : 'border border-white/10 text-neutral-400 hover:border-white/30 hover:text-white'
+                categorySlug === cat.slug ? 'font-medium' : 'border border-neutral-200 text-neutral-600 hover:border-neutral-300'
               }`}
+              style={categorySlug === cat.slug ? { backgroundColor: '#d4708a', color: 'white' } : undefined}
             >
               {cat.name}
             </button>
@@ -145,7 +147,7 @@ export default function ProductsPage() {
 
           <button
             onClick={() => setFiltersOpen(!filtersOpen)}
-            className={`flex items-center gap-2 btn-secondary py-2 text-sm ${filtersOpen ? 'bg-white/10' : ''}`}
+            className={`flex items-center gap-2 btn-secondary py-2 text-sm ${filtersOpen ? 'bg-neutral-100' : ''}`}
           >
             <SlidersHorizontal size={14} />
             Filters
@@ -154,13 +156,13 @@ export default function ProductsPage() {
           <div className="flex gap-1 ml-auto">
             <button
               onClick={() => setViewMode('grid')}
-              className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-white/10 text-white' : 'text-neutral-500 hover:text-white'}`}
+              className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-neutral-100 text-neutral-800' : 'text-neutral-500 hover:text-neutral-900'}`}
             >
               <Grid3X3 size={16} />
             </button>
             <button
               onClick={() => setViewMode('list')}
-              className={`p-2 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-white/10 text-white' : 'text-neutral-500 hover:text-white'}`}
+              className={`p-2 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-neutral-100 text-neutral-800' : 'text-neutral-500 hover:text-neutral-900'}`}
             >
               <LayoutList size={16} />
             </button>
@@ -176,7 +178,7 @@ export default function ProductsPage() {
               exit={{ height: 0, opacity: 0 }}
               className="overflow-hidden"
             >
-              <div className="mt-4 p-4 rounded-xl bg-white/3 border border-white/5 flex flex-wrap gap-4">
+              <div className="mt-4 p-4 rounded-xl bg-neutral-50 border border-neutral-200 flex flex-wrap gap-4">
                 <div>
                   <label className="text-xs text-neutral-500 mb-1.5 block">Min Price (GHS)</label>
                   <input
@@ -217,12 +219,12 @@ export default function ProductsPage() {
         {loading ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {[...Array(8)].map((_, i) => (
-              <div key={i} className="aspect-[3/4] rounded-2xl bg-neutral-900 shimmer-bg" />
+              <div key={i} className="aspect-[3/4] rounded-2xl bg-neutral-100 shimmer-bg" />
             ))}
           </div>
         ) : products.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-center">
-            <Search size={48} className="text-neutral-700 mb-4" />
+            <Search size={48} className="text-neutral-300 mb-4" />
             <p className="text-neutral-400 font-medium mb-2">No products found</p>
             <p className="text-neutral-600 text-sm">Try adjusting your filters or search terms</p>
           </div>

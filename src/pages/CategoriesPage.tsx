@@ -40,13 +40,13 @@ export default function CategoriesPage() {
           className="mb-12"
         >
           <p className="text-primary-400 text-xs font-medium tracking-widest uppercase mb-3">Explore</p>
-          <h1 className="font-display text-5xl font-semibold text-white">All Categories</h1>
+          <h1 className="font-display text-5xl font-semibold text-neutral-900">All Categories</h1>
         </motion.div>
 
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {[...Array(2)].map((_, i) => (
-              <div key={i} className="aspect-video rounded-2xl bg-neutral-900 shimmer-bg" />
+              <div key={i} className="aspect-video rounded-2xl bg-neutral-100 shimmer-bg" />
             ))}
           </div>
         ) : (
@@ -64,7 +64,7 @@ export default function CategoriesPage() {
               >
                 <Link
                   to={`/products?category=${cat.slug}`}
-                  className="relative group block rounded-2xl overflow-hidden aspect-video bg-neutral-900"
+                  className="relative group block rounded-2xl overflow-hidden aspect-video bg-neutral-100"
                 >
                   {imageUrl && (
                     <img

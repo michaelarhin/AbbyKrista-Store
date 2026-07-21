@@ -9,12 +9,12 @@ export default function TermsOfServicePage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <h1 className="font-display text-4xl font-semibold text-white mb-2">Terms of Service</h1>
+          <h1 className="font-display text-4xl font-semibold text-neutral-900 mb-2">Terms of Service</h1>
           <p className="text-neutral-500 text-sm mb-10">Last updated: June 2026</p>
 
           <div className="prose-policy space-y-8 text-neutral-300 text-sm leading-relaxed">
             <section>
-              <h2 className="text-white text-lg font-semibold mb-3">1. Introduction</h2>
+              <h2 className="text-neutral-900 text-lg font-semibold mb-3">1. Introduction</h2>
               <p>
                 Welcome to ABBYKRISTA OUTLET. These Terms of Service ("Terms") govern your use of our website and the purchase of products from us. By accessing or using our website, you agree to be bound by these Terms. If you do not agree, please do not use our services.
               </p>
@@ -24,14 +24,14 @@ export default function TermsOfServicePage() {
             </section>
 
             <section>
-              <h2 className="text-white text-lg font-semibold mb-3">2. Eligibility</h2>
+              <h2 className="text-neutral-900 text-lg font-semibold mb-3">2. Eligibility</h2>
               <p>
                 To use our services and make purchases, you must be at least 18 years of age or have the consent of a parent or legal guardian. By placing an order, you represent that you meet this requirement.
               </p>
             </section>
 
             <section>
-              <h2 className="text-white text-lg font-semibold mb-3">3. Products & Pricing</h2>
+              <h2 className="text-neutral-900 text-lg font-semibold mb-3">3. Products & Pricing</h2>
               <ul className="list-disc pl-5 space-y-2">
                 <li>All prices are displayed in Ghana Cedis (GHS) unless otherwise indicated.</li>
                 <li>We make every effort to display accurate product descriptions and images. However, slight variations in colour or appearance may occur due to screen settings.</li>
@@ -42,7 +42,7 @@ export default function TermsOfServicePage() {
             </section>
 
             <section>
-              <h2 className="text-white text-lg font-semibold mb-3">4. Orders & Payment</h2>
+              <h2 className="text-neutral-900 text-lg font-semibold mb-3">4. Orders & Payment</h2>
               <ul className="list-disc pl-5 space-y-2">
                 <li>An order is confirmed once we send you an order confirmation via email or SMS.</li>
                 <li>We accept payments via Mobile Money (MTN MoMo, Vodafone Cash, AirtelTigo Money), debit/credit cards, and cash on delivery (where available).</li>
@@ -53,7 +53,7 @@ export default function TermsOfServicePage() {
             </section>
 
             <section>
-              <h2 className="text-white text-lg font-semibold mb-3">5. Shipping & Delivery</h2>
+              <h2 className="text-neutral-900 text-lg font-semibold mb-3">5. Shipping & Delivery</h2>
               <ul className="list-disc pl-5 space-y-2">
                 <li>We deliver across Ghana. Delivery timelines vary based on your location (typically 1–5 business days within Accra, 3–7 business days to other regions).</li>
                 <li>Shipping fees are calculated at checkout based on your delivery address and order weight/size.</li>
@@ -64,7 +64,7 @@ export default function TermsOfServicePage() {
             </section>
 
             <section>
-              <h2 className="text-white text-lg font-semibold mb-3">6. Returns & Refunds</h2>
+              <h2 className="text-neutral-900 text-lg font-semibold mb-3">6. Returns & Refunds</h2>
               <p>
                 Please refer to our <a href="/refund-policy" className="text-primary-400 hover:text-primary-300 underline">Refund Policy</a> for complete details. In summary:
               </p>
@@ -76,14 +76,14 @@ export default function TermsOfServicePage() {
             </section>
 
             <section>
-              <h2 className="text-white text-lg font-semibold mb-3">7. Intellectual Property</h2>
+              <h2 className="text-neutral-900 text-lg font-semibold mb-3">7. Intellectual Property</h2>
               <p>
                 All content on this website — including text, graphics, logos, images, and software — is the property of ABBYKRISTA OUTLET or its content suppliers and is protected by Ghanaian and international intellectual property laws. You may not reproduce, distribute, or create derivative works from our content without express written permission.
               </p>
             </section>
 
             <section>
-              <h2 className="text-white text-lg font-semibold mb-3">8. User Conduct</h2>
+              <h2 className="text-neutral-900 text-lg font-semibold mb-3">8. User Conduct</h2>
               <p>When using our website, you agree not to:</p>
               <ul className="list-disc pl-5 mt-3 space-y-2">
                 <li>Use the site for any unlawful purpose or in violation of any applicable Ghanaian laws</li>
@@ -95,7 +95,7 @@ export default function TermsOfServicePage() {
             </section>
 
             <section>
-              <h2 className="text-white text-lg font-semibold mb-3">9. Limitation of Liability</h2>
+              <h2 className="text-neutral-900 text-lg font-semibold mb-3">9. Limitation of Liability</h2>
               <p>
                 To the fullest extent permitted by Ghanaian law, ABBYKRISTA OUTLET shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of our website or purchase of products, including but not limited to loss of profits, data, or goodwill.
               </p>
@@ -105,33 +105,33 @@ export default function TermsOfServicePage() {
             </section>
 
             <section>
-              <h2 className="text-white text-lg font-semibold mb-3">10. Indemnification</h2>
+              <h2 className="text-neutral-900 text-lg font-semibold mb-3">10. Indemnification</h2>
               <p>
                 You agree to indemnify and hold harmless ABBYKRISTA OUTLET, its owners, employees, and agents from any claims, losses, or damages (including legal fees) arising from your breach of these Terms or misuse of our services.
               </p>
             </section>
 
             <section>
-              <h2 className="text-white text-lg font-semibold mb-3">11. Governing Law & Dispute Resolution</h2>
+              <h2 className="text-neutral-900 text-lg font-semibold mb-3">11. Governing Law & Dispute Resolution</h2>
               <p>
                 These Terms are governed by and construed in accordance with the laws of the Republic of Ghana. Any disputes arising from these Terms or your use of our services shall be resolved through negotiation first. If unresolved, disputes shall be submitted to the courts of competent jurisdiction in Accra, Ghana.
               </p>
             </section>
 
             <section>
-              <h2 className="text-white text-lg font-semibold mb-3">12. Changes to These Terms</h2>
+              <h2 className="text-neutral-900 text-lg font-semibold mb-3">12. Changes to These Terms</h2>
               <p>
                 We reserve the right to modify these Terms at any time. Changes will be posted on this page with an updated date. Continued use of our website after changes constitutes acceptance of the revised Terms.
               </p>
             </section>
 
             <section>
-              <h2 className="text-white text-lg font-semibold mb-3">13. Contact Us</h2>
+              <h2 className="text-neutral-900 text-lg font-semibold mb-3">13. Contact Us</h2>
               <p>For questions about these Terms of Service, please reach out:</p>
               <ul className="list-none mt-3 space-y-1">
-                <li><strong className="text-white">Business:</strong> ABBYKRISTA OUTLET</li>
-                <li><strong className="text-white">Location:</strong> Accra, Ghana</li>
-                <li><strong className="text-white">Email:</strong> support@abbykristaoutlet.com</li>
+                <li><strong className="text-neutral-900">Business:</strong> ABBYKRISTA OUTLET</li>
+                <li><strong className="text-neutral-900">Location:</strong> Accra, Ghana</li>
+                <li><strong className="text-neutral-900">Email:</strong> support@abbykristaoutlet.com</li>
               </ul>
             </section>
           </div>
@@ -140,3 +140,4 @@ export default function TermsOfServicePage() {
     </div>
   );
 }
+

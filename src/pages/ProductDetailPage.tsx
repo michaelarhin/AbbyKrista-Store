@@ -71,7 +71,7 @@ export default function ProductDetailPage() {
     return (
       <div className="min-h-screen pt-24 flex flex-col items-center justify-center text-center px-4">
         <Package size={64} className="text-neutral-700 mb-4" />
-        <h2 className="text-2xl font-display text-white mb-2">Product not found</h2>
+        <h2 className="text-2xl font-display text-neutral-900 mb-2">Product not found</h2>
         <p className="text-neutral-400 mb-6">This product may no longer be available.</p>
         <Link to="/products" className="btn-secondary">Browse Products</Link>
       </div>
@@ -87,16 +87,16 @@ export default function ProductDetailPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-neutral-500 mb-8">
-          <button onClick={() => navigate(-1)} className="flex items-center gap-1 hover:text-white transition-colors">
+          <button onClick={() => navigate(-1)} className="flex items-center gap-1 hover:text-neutral-900 transition-colors">
             <ArrowLeft size={14} />
             Back
           </button>
           <span>/</span>
-          <Link to="/products" className="hover:text-white transition-colors">Products</Link>
+          <Link to="/products" className="hover:text-neutral-900 transition-colors">Products</Link>
           {product.category && (
             <>
               <span>/</span>
-              <Link to={`/products?category=${product.category.slug}`} className="hover:text-white transition-colors">
+              <Link to={`/products?category=${product.category.slug}`} className="hover:text-neutral-900 transition-colors">
                 {product.category.name}
               </Link>
             </>
@@ -108,7 +108,7 @@ export default function ProductDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 xl:gap-20">
           {/* Images */}
           <div className="space-y-4">
-            <div className="relative aspect-square rounded-2xl overflow-hidden bg-neutral-900">
+            <div className="relative aspect-square rounded-2xl overflow-hidden bg-neutral-100">
               <AnimatePresence mode="wait">
                 <motion.img
                   key={activeImage}
@@ -126,13 +126,13 @@ export default function ProductDetailPage() {
                 <>
                   <button
                     onClick={() => setActiveImage(i => (i - 1 + product.images.length) % product.images.length)}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full glass-dark flex items-center justify-center hover:bg-white/10 transition-colors"
+                    className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full glass-dark flex items-center justify-center hover:bg-neutral-100 transition-colors"
                   >
                     <ChevronLeft size={16} />
                   </button>
                   <button
                     onClick={() => setActiveImage(i => (i + 1) % product.images.length)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full glass-dark flex items-center justify-center hover:bg-white/10 transition-colors"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full glass-dark flex items-center justify-center hover:bg-neutral-100 transition-colors"
                   >
                     <ChevronRight size={16} />
                   </button>
@@ -155,8 +155,9 @@ export default function ProductDetailPage() {
                     key={i}
                     onClick={() => setActiveImage(i)}
                     className={`w-20 h-20 rounded-xl overflow-hidden border-2 transition-all duration-200 ${
-                      i === activeImage ? 'border-white' : 'border-transparent opacity-50 hover:opacity-75'
+                      i === activeImage ? 'border-neutral-800' : 'border-transparent opacity-50 hover:opacity-75'
                     }`}
+                    style={i === activeImage ? { borderColor: '#d4708a' } : undefined}
                   >
                     <img src={`${img}?auto=compress&w=160`} alt="" className="w-full h-full object-cover" />
                   </button>
@@ -176,7 +177,7 @@ export default function ProductDetailPage() {
               </Link>
             )}
 
-            <h1 className="font-display text-3xl md:text-4xl font-semibold text-white mb-4 leading-tight">
+            <h1 className="font-display text-3xl md:text-4xl font-semibold text-neutral-900 mb-4 leading-tight">
               {product.name}
             </h1>
 
@@ -192,7 +193,7 @@ export default function ProductDetailPage() {
 
             {/* Price */}
             <div className="flex items-center gap-4 mb-6">
-              <span className="text-3xl font-semibold text-white">
+              <span className="text-3xl font-semibold text-neutral-900">
                 {formatPrice(product.price, currency)}
               </span>
               {product.compare_at_price && (
@@ -210,7 +211,7 @@ export default function ProductDetailPage() {
             {product.tags.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-8">
                 {product.tags.map(tag => (
-                  <span key={tag} className="px-3 py-1 rounded-full border border-white/10 text-neutral-400 text-xs">
+                  <span key={tag} className="px-3 py-1 rounded-full border border-neutral-200 text-neutral-500 text-xs">
                     {tag}
                   </span>
                 ))}
@@ -274,17 +275,17 @@ export default function ProductDetailPage() {
 
             {/* Quantity */}
             <div className="flex items-center gap-4 mb-6">
-              <div className="flex items-center border border-white/10 rounded-full overflow-hidden">
+              <div className="flex items-center border border-neutral-200 rounded-full overflow-hidden">
                 <button
                   onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                  className="w-10 h-10 flex items-center justify-center hover:bg-white/5 transition-colors"
+                  className="w-10 h-10 flex items-center justify-center hover:bg-neutral-50 transition-colors"
                 >
                   <Minus size={14} />
                 </button>
                 <span className="w-10 text-center text-sm font-medium">{quantity}</span>
                 <button
                   onClick={() => setQuantity(q => Math.min(product.stock_quantity, q + 1))}
-                  className="w-10 h-10 flex items-center justify-center hover:bg-white/5 transition-colors"
+                  className="w-10 h-10 flex items-center justify-center hover:bg-neutral-50 transition-colors"
                 >
                   <Plus size={14} />
                 </button>
@@ -325,11 +326,11 @@ export default function ProductDetailPage() {
                 </AnimatePresence>
               </button>
 
-              <button className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center text-neutral-400 hover:text-white hover:border-white/30 transition-all">
+              <button className="w-12 h-12 rounded-full border border-neutral-200 flex items-center justify-center text-neutral-400 hover:text-neutral-800 hover:border-neutral-400 transition-all">
                 <Heart size={16} />
               </button>
 
-              <button className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center text-neutral-400 hover:text-white hover:border-white/30 transition-all">
+              <button className="w-12 h-12 rounded-full border border-neutral-200 flex items-center justify-center text-neutral-400 hover:text-neutral-800 hover:border-neutral-400 transition-all">
                 <Share2 size={16} />
               </button>
             </div>
@@ -344,7 +345,7 @@ export default function ProductDetailPage() {
         {/* Related products */}
         {related.length > 0 && (
           <div className="mt-24">
-            <h2 className="font-display text-2xl font-semibold text-white mb-8">You May Also Like</h2>
+            <h2 className="font-display text-2xl font-semibold text-neutral-900 mb-8">You May Also Like</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {related.map((p, i) => (
                 <ProductCard key={p.id} product={p} index={i} />

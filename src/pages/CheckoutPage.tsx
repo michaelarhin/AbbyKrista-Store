@@ -263,7 +263,7 @@ export default function CheckoutPage() {
     return (
       <div className="min-h-screen pt-24 flex flex-col items-center justify-center text-center px-4">
         <Package size={64} className="text-neutral-700 mb-4" />
-        <h2 className="text-2xl font-display text-white mb-2">Your cart is empty</h2>
+        <h2 className="text-2xl font-display text-neutral-900 mb-2">Your cart is empty</h2>
         <Link to="/products" className="btn-primary mt-4">Start Shopping</Link>
       </div>
     );
@@ -280,9 +280,9 @@ export default function CheckoutPage() {
           <div className="w-20 h-20 rounded-full bg-success-500/20 flex items-center justify-center mb-6 mx-auto">
             <CheckCircle size={40} className="text-success-400" />
           </div>
-          <h2 className="font-display text-3xl font-semibold text-white mb-2">Order Placed!</h2>
+          <h2 className="font-display text-3xl font-semibold text-neutral-900 mb-2">Order Placed!</h2>
           <p className="text-neutral-400 mb-1">Thank you for your order.</p>
-          <p className="text-white font-mono text-lg mb-8 mt-4 px-4 py-2 bg-white/5 rounded-xl inline-block">
+          <p className="text-neutral-800 font-mono text-lg mb-8 mt-4 px-4 py-2 bg-neutral-50 rounded-xl inline-block">
             {orderSuccess}
           </p>
           <div className="flex gap-3 justify-center">
@@ -298,10 +298,10 @@ export default function CheckoutPage() {
     <div className="min-h-screen pt-20 pb-24">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
         <div className="flex items-center gap-3 mb-8">
-          <Link to="/products" className="p-2 hover:bg-white/5 rounded-lg text-neutral-400 hover:text-white transition-colors">
+          <Link to="/products" className="p-2 hover:bg-neutral-100 rounded-lg text-neutral-500 hover:text-neutral-800 transition-colors">
             <ArrowLeft size={18} />
           </Link>
-          <h1 className="font-display text-3xl font-semibold text-white">Checkout</h1>
+          <h1 className="font-display text-3xl font-semibold text-neutral-900">Checkout</h1>
         </div>
 
         {paymentError && (
@@ -356,8 +356,8 @@ export default function CheckoutPage() {
                 {PAYMENT_METHODS.map(method => (
                   <label key={method.value} className={`flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all duration-200 ${
                     form.payment_method === method.value
-                      ? 'border-white/30 bg-white/5'
-                      : 'border-white/5 hover:border-white/15'
+                      ? 'border-primary-300 bg-neutral-50'
+                      : 'border-neutral-200 hover:border-white/15'
                   }`}>
                     <input
                       type="radio"
@@ -368,16 +368,16 @@ export default function CheckoutPage() {
                       className="sr-only"
                     />
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                      form.payment_method === method.value ? 'bg-primary-500/20' : 'bg-white/5'
+                      form.payment_method === method.value ? 'bg-primary-500/20' : 'bg-neutral-50'
                     }`}>
                       <method.icon size={20} className={form.payment_method === method.value ? 'text-primary-400' : 'text-neutral-400'} />
                     </div>
                     <div className="flex-1">
-                      <p className="text-white text-sm font-medium">{method.label}</p>
+                      <p className="text-neutral-800 text-sm font-medium">{method.label}</p>
                       <p className="text-neutral-500 text-xs">{method.desc}</p>
                     </div>
                     <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                      form.payment_method === method.value ? 'border-white' : 'border-white/20'
+                      form.payment_method === method.value ? 'border-neutral-800' : 'border-neutral-300'
                     }`}>
                       {form.payment_method === method.value && (
                         <div className="w-2 h-2 rounded-full bg-white" />
@@ -432,44 +432,44 @@ export default function CheckoutPage() {
               {/* Mobile toggle */}
               <button
                 type="button"
-                className="lg:hidden w-full flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/10 mb-4"
+                className="lg:hidden w-full flex items-center justify-between p-4 rounded-xl bg-neutral-50 border border-neutral-200 mb-4"
                 onClick={() => setOrderSummaryOpen(!orderSummaryOpen)}
               >
-                <span className="text-white text-sm font-medium">Order Summary ({totalItems})</span>
-                {orderSummaryOpen ? <ChevronUp size={16} className="text-white" /> : <ChevronDown size={16} className="text-white" />}
+                <span className="text-neutral-800 text-sm font-medium">Order Summary ({totalItems})</span>
+                {orderSummaryOpen ? <ChevronUp size={16} className="text-neutral-800" /> : <ChevronDown size={16} className="text-neutral-800" />}
               </button>
 
               <div className={`lg:block ${orderSummaryOpen ? 'block' : 'hidden'}`}>
                 <div className="glass-dark rounded-2xl p-6 space-y-4">
-                  <h3 className="text-white font-semibold mb-4">Order Summary</h3>
+                  <h3 className="text-neutral-800 font-semibold mb-4">Order Summary</h3>
 
                   {/* Items */}
                   <div className="space-y-3 max-h-64 overflow-y-auto">
                     {items.map(item => (
                       <div key={`${item.product.id}-${item.selectedColor || ''}`} className="flex gap-3">
-                        <div className="w-12 h-12 rounded-lg overflow-hidden bg-neutral-800 shrink-0">
+                        <div className="w-12 h-12 rounded-lg overflow-hidden bg-neutral-100 shrink-0">
                           {item.product.images[0] && (
                             <img src={item.product.images[0]} alt="" className="w-full h-full object-cover" />
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-white text-xs font-medium truncate">{item.product.name}</p>
+                          <p className="text-neutral-800 text-xs font-medium truncate">{item.product.name}</p>
                           {item.selectedColor && (
                             <p className="text-neutral-500 text-xs">Color: {item.selectedColor}</p>
                           )}
                           <p className="text-neutral-500 text-xs">Qty: {item.quantity}</p>
                         </div>
-                        <span className="text-white text-xs font-semibold shrink-0">
+                        <span className="text-neutral-800 text-xs font-semibold shrink-0">
                           {formatPrice(item.product.price * item.quantity, currency)}
                         </span>
                       </div>
                     ))}
                   </div>
 
-                  <div className="border-t border-white/10 pt-4 space-y-2">
+                  <div className="border-t border-neutral-200 pt-4 space-y-2">
                     <div className="flex justify-between text-sm">
                       <span className="text-neutral-400">Subtotal</span>
-                      <span className="text-white">{formatPrice(subtotal, currency)}</span>
+                      <span className="text-neutral-800">{formatPrice(subtotal, currency)}</span>
                     </div>
                     {discountResult && (
                       <div className="flex justify-between text-sm">
@@ -481,9 +481,9 @@ export default function CheckoutPage() {
                       <span className="text-neutral-400">Shipping</span>
                       <span className="text-neutral-400 text-xs">Calculated based on your location</span>
                     </div>
-                    <div className="flex justify-between font-semibold text-base pt-2 border-t border-white/10">
-                      <span className="text-white">Total</span>
-                      <span className="text-white">{formatPrice(total, currency)}</span>
+                    <div className="flex justify-between font-semibold text-base pt-2 border-t border-neutral-200">
+                      <span className="text-neutral-800">Total</span>
+                      <span className="text-neutral-800">{formatPrice(total, currency)}</span>
                     </div>
                   </div>
 
@@ -535,7 +535,7 @@ export default function CheckoutPage() {
 function Section({ title, children, optional }: { title: string; children: React.ReactNode; optional?: boolean }) {
   return (
     <div className="glass-dark rounded-2xl p-6 space-y-4">
-      <h3 className="text-white font-semibold flex items-center gap-2">
+      <h3 className="text-neutral-800 font-semibold flex items-center gap-2">
         {title}
         {optional && <span className="text-neutral-600 text-xs font-normal">(optional)</span>}
       </h3>
@@ -554,3 +554,4 @@ function Field({ label, required, children }: { label: string; required?: boolea
     </div>
   );
 }
+

@@ -50,10 +50,10 @@ export default function AdminLoginPage() {
         <div className="glass-dark rounded-2xl p-8">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-4">
-              <Lock size={24} className="text-white" />
+            <div className="w-14 h-14 rounded-2xl bg-neutral-50 border border-neutral-200 flex items-center justify-center mx-auto mb-4">
+              <Lock size={24} className="text-neutral-800" />
             </div>
-            <h1 className="text-2xl font-display font-semibold text-white">Admin Access</h1>
+            <h1 className="text-2xl font-display font-semibold text-neutral-900">Admin Access</h1>
             <p className="text-neutral-500 text-sm mt-2">Sign in to manage your store</p>
           </div>
 
@@ -126,7 +126,7 @@ export default function AdminLoginPage() {
           </form>
         </div>
 
-        <p className="text-center text-neutral-600 text-xs mt-6">
+        <p className="text-center text-neutral-400 text-xs mt-6">
           This area is restricted to store administrators only.
         </p>
       </motion.div>

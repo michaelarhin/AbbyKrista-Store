@@ -20,7 +20,7 @@ export default function HomePage() {
       <HeroSection />
 
       {/* Scrolling brand strip */}
-      <div className="overflow-hidden py-6 border-y border-white/5 bg-neutral-950/80">
+      <div className="overflow-hidden py-6 border-y border-neutral-200" style={{ backgroundColor: 'rgba(255,249,249,0.9)' }}>
         <motion.div
           style={{ x: stripX }}
           className="flex gap-16 whitespace-nowrap"
@@ -31,7 +31,7 @@ export default function HomePage() {
             <span
               key={i}
               className={`text-sm tracking-widest uppercase ${
-                text === '•' ? 'text-primary-500' : 'text-neutral-600'
+                text === '•' ? 'text-primary-500' : 'text-neutral-700'
               }`}
             >
               {text}
@@ -69,7 +69,7 @@ function ParallaxCTA() {
           className="w-full h-full object-cover opacity-20"
         />
       </motion.div>
-      <div className="absolute inset-0 bg-gradient-to-b from-neutral-950/90 via-neutral-950/60 to-neutral-950/90" />
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-transparent" />
 
       <motion.div
         style={{ opacity }}
@@ -79,7 +79,7 @@ function ParallaxCTA() {
         <h2 className="font-display text-5xl md:text-7xl font-semibold text-gradient mb-6 tracking-tight">
           New Arrivals
         </h2>
-        <p className="text-neutral-400 text-lg mb-10 max-w-lg mx-auto">
+        <p className="text-neutral-600 text-lg mb-10 max-w-lg mx-auto">
           Fresh drops every week. From statement home decor to trendy shades and accessories — don't miss out.
         </p>
         <Link to="/products" className="btn-primary text-base px-10 py-4">
@@ -89,3 +89,4 @@ function ParallaxCTA() {
     </section>
   );
 }
+

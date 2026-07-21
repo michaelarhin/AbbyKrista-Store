@@ -26,7 +26,7 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen pt-20 flex">
       {/* Sidebar */}
-      <nav className="w-56 shrink-0 border-r border-white/10 p-4 hidden lg:block">
+      <nav className="w-56 shrink-0 border-r border-neutral-200 p-4 hidden lg:block">
         <p className="text-neutral-600 text-xs uppercase tracking-widest mb-4 px-3">Admin</p>
         <div className="space-y-1">
           {navItems.map(item => (
@@ -35,9 +35,10 @@ export default function AdminPage() {
               onClick={() => setTab(item.id)}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-200 ${
                 tab === item.id
-                  ? 'bg-white/10 text-white font-medium'
-                  : 'text-neutral-500 hover:text-white hover:bg-white/5'
+                  ? 'bg-neutral-100 font-medium'
+                  : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50'
               }`}
+              style={tab === item.id ? { color: '#d4708a' } : undefined}
             >
               <item.icon size={16} />
               {item.label}
@@ -47,14 +48,15 @@ export default function AdminPage() {
       </nav>
 
       {/* Mobile tabs */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 glass-dark border-t border-white/10 flex overflow-x-auto">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-neutral-200 flex overflow-x-auto">
         {navItems.map(item => (
           <button
             key={item.id}
             onClick={() => setTab(item.id)}
             className={`flex-1 flex flex-col items-center gap-1 py-3 text-xs transition-colors min-w-max px-3 ${
-              tab === item.id ? 'text-white' : 'text-neutral-600'
+              tab === item.id ? '' : 'text-neutral-600'
             }`}
+            style={tab === item.id ? { color: '#d4708a' } : undefined}
           >
             <item.icon size={18} />
             {item.label}
@@ -107,15 +109,15 @@ function DashboardPanel() {
   }, []);
 
   const statCards = [
-    { label: 'Total Orders', value: stats.orders.toString(), icon: ShoppingCart, color: 'text-primary-400', bg: 'bg-primary-500/10' },
+    { label: 'Total Orders', value: stats.orders.toString(), icon: ShoppingCart, color: 'text-primary-500', bg: 'bg-primary-500/10' },
     { label: 'Revenue (GHS)', value: formatPrice(stats.revenue, 'GHS'), icon: DollarSign, color: 'text-success-400', bg: 'bg-success-500/10' },
-    { label: 'Products', value: stats.products.toString(), icon: Package, color: 'text-accent-400', bg: 'bg-accent-500/10' },
+    { label: 'Products', value: stats.products.toString(), icon: Package, color: 'text-warning-500', bg: 'bg-warning-500/10' },
     { label: 'Low Stock Alerts', value: stats.lowStock.toString(), icon: AlertTriangle, color: 'text-warning-400', bg: 'bg-warning-500/10' },
   ];
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-display font-semibold text-white">Dashboard</h2>
+      <h2 className="text-2xl font-display font-semibold text-neutral-900">Dashboard</h2>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {statCards.map(card => (
@@ -123,19 +125,19 @@ function DashboardPanel() {
             <div className={`w-10 h-10 rounded-xl ${card.bg} flex items-center justify-center mb-3`}>
               <card.icon size={18} className={card.color} />
             </div>
-            <p className="text-white text-xl font-semibold">{card.value}</p>
+            <p className="text-neutral-800 text-xl font-semibold">{card.value}</p>
             <p className="text-neutral-500 text-xs mt-0.5">{card.label}</p>
           </div>
         ))}
       </div>
 
       <div>
-        <h3 className="text-white font-semibold mb-4">Recent Orders</h3>
+        <h3 className="text-neutral-800 font-semibold mb-4">Recent Orders</h3>
         <div className="glass-dark rounded-2xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-white/5">
+                <tr className="border-b border-neutral-100">
                   <th className="text-left text-neutral-500 text-xs px-4 py-3 font-medium">Order #</th>
                   <th className="text-left text-neutral-500 text-xs px-4 py-3 font-medium">Customer</th>
                   <th className="text-left text-neutral-500 text-xs px-4 py-3 font-medium">Total</th>
@@ -144,10 +146,10 @@ function DashboardPanel() {
               </thead>
               <tbody>
                 {recentOrders.map(order => (
-                  <tr key={order.id} className="border-b border-white/5 last:border-0 hover:bg-white/2 transition-colors">
-                    <td className="px-4 py-3 text-white text-xs font-mono">{order.order_number}</td>
-                    <td className="px-4 py-3 text-neutral-300 text-xs">{order.customer_name}</td>
-                    <td className="px-4 py-3 text-white text-xs">{formatPrice(order.total, 'GHS')}</td>
+                  <tr key={order.id} className="border-b border-neutral-100 last:border-0 hover:bg-neutral-50 transition-colors">
+                    <td className="px-4 py-3 text-neutral-800 text-xs font-mono">{order.order_number}</td>
+                    <td className="px-4 py-3 text-neutral-700 text-xs">{order.customer_name}</td>
+                    <td className="px-4 py-3 text-neutral-800 text-xs">{formatPrice(order.total, 'GHS')}</td>
                     <td className="px-4 py-3">
                       <StatusBadge status={order.status} />
                     </td>
@@ -344,7 +346,7 @@ function ProductsPanel() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-white/5">
+                <tr className="border-b border-neutral-100">
                   <th className="text-left text-neutral-500 text-xs px-4 py-3 font-medium">Product</th>
                   <th className="text-left text-neutral-500 text-xs px-4 py-3 font-medium">Price</th>
                   <th className="text-left text-neutral-500 text-xs px-4 py-3 font-medium">Stock</th>
@@ -354,30 +356,30 @@ function ProductsPanel() {
               </thead>
               <tbody>
                 {products.map(p => (
-                  <tr key={p.id} className="border-b border-white/5 last:border-0 hover:bg-white/2 transition-colors">
+                  <tr key={p.id} className="border-b border-neutral-100 last:border-0 hover:bg-neutral-50 transition-colors">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         {p.images[0] && (
                           <img src={`${p.images[0]}?auto=compress&w=64`} alt="" className="w-9 h-9 rounded-lg object-cover bg-neutral-800" />
                         )}
                         <div>
-                          <p className="text-white text-xs font-medium">{p.name}</p>
+                          <p className="text-neutral-800 text-xs font-medium">{p.name}</p>
                           <p className="text-neutral-600 text-xs">{p.sku || '—'}</p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-white text-xs">{formatPrice(p.price, 'GHS')}</td>
+                    <td className="px-4 py-3 text-neutral-800 text-xs">{formatPrice(p.price, 'GHS')}</td>
                     <td className="px-4 py-3">
                       <StockBadge quantity={p.stock_quantity} threshold={p.low_stock_threshold} />
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`px-2 py-0.5 rounded-full text-xs ${p.is_active ? 'bg-success-500/10 text-success-400' : 'bg-neutral-800 text-neutral-500'}`}>
+                      <span className={`px-2 py-0.5 rounded-full text-xs ${p.is_active ? 'bg-success-500/10 text-success-400' : 'bg-neutral-100 text-neutral-500'}`}>
                         {p.is_active ? 'In Stock' : 'Draft'}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex gap-1 justify-end">
-                        <button onClick={() => openEdit(p)} className="p-1.5 hover:bg-white/5 rounded-lg text-neutral-400 hover:text-white transition-colors">
+                        <button onClick={() => openEdit(p)} className="p-1.5 hover:bg-neutral-100 rounded-lg text-neutral-500 hover:text-neutral-900 transition-colors">
                           <Edit2 size={13} />
                         </button>
                         <button onClick={() => deleteProduct(p.id)} className="p-1.5 hover:bg-error-500/10 rounded-lg text-neutral-400 hover:text-error-400 transition-colors">
@@ -479,7 +481,7 @@ function ProductsPanel() {
                 </label>
                 {/* Still allow URL input as fallback */}
                 <details className="mt-2">
-                  <summary className="text-neutral-600 text-xs cursor-pointer hover:text-neutral-400">Or add image URLs manually</summary>
+                  <summary className="text-neutral-500 text-xs cursor-pointer hover:text-neutral-700">Or add image URLs manually</summary>
                   <textarea value={form.images} onChange={e => setForm(f => ({ ...f, images: e.target.value }))} className="input-field text-sm h-16 resize-none font-mono text-xs mt-2" placeholder="https://... (one per line)" />
                 </details>
               </div>
@@ -498,11 +500,11 @@ function ProductsPanel() {
               <div className="flex gap-6">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input type="checkbox" checked={form.is_active} onChange={e => setForm(f => ({ ...f, is_active: e.target.checked }))} className="rounded" />
-                  <span className="text-neutral-300 text-sm">In Stock</span>
+                  <span className="text-neutral-700 text-sm">In Stock</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input type="checkbox" checked={form.is_featured} onChange={e => setForm(f => ({ ...f, is_featured: e.target.checked }))} className="rounded" />
-                  <span className="text-neutral-300 text-sm">Featured</span>
+                  <span className="text-neutral-700 text-sm">Featured</span>
                 </label>
               </div>
 
@@ -620,17 +622,17 @@ function CategoriesPanel() {
               <img src={cat.image_url} alt="" className="w-full h-32 object-cover" />
             )}
             {!cat.image_url && (
-              <div className="w-full h-32 bg-neutral-800 flex items-center justify-center">
+              <div className="w-full h-32 bg-neutral-100 flex items-center justify-center">
                 <span className="text-neutral-600 text-xs">No image</span>
               </div>
             )}
             <div className="p-4 flex items-center justify-between">
               <div>
-                <p className="text-white text-sm font-medium">{cat.name}</p>
+                <p className="text-neutral-800 text-sm font-medium">{cat.name}</p>
                 <p className="text-neutral-500 text-xs mt-0.5 line-clamp-1">{cat.description || '—'}</p>
               </div>
               <div className="flex gap-1">
-                <button onClick={() => openEdit(cat)} className="p-1.5 hover:bg-white/5 rounded text-neutral-400 hover:text-white transition-colors"><Edit2 size={13} /></button>
+                <button onClick={() => openEdit(cat)} className="p-1.5 hover:bg-neutral-100 rounded text-neutral-500 hover:text-neutral-900 transition-colors"><Edit2 size={13} /></button>
                 <button onClick={() => del(cat.id)} className="p-1.5 hover:bg-error-500/10 rounded text-neutral-400 hover:text-error-400 transition-colors"><Trash2 size={13} /></button>
               </div>
             </div>
@@ -728,7 +730,7 @@ function OrdersPanel() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-display font-semibold text-white">Orders</h2>
-        <button onClick={load} className="p-2 hover:bg-white/5 rounded-lg text-neutral-400 hover:text-white transition-colors"><RefreshCw size={16} /></button>
+        <button onClick={load} className="p-2 hover:bg-neutral-100 rounded-lg text-neutral-500 hover:text-neutral-900 transition-colors"><RefreshCw size={16} /></button>
       </div>
 
       {loading ? (
@@ -738,7 +740,7 @@ function OrdersPanel() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-white/5">
+                <tr className="border-b border-neutral-100">
                   {['Order', 'Customer', 'Items', 'Total', 'Payment', 'Status', 'Date', ''].map(h => (
                     <th key={h} className="text-left text-neutral-500 text-xs px-4 py-3 font-medium">{h}</th>
                   ))}
@@ -746,17 +748,17 @@ function OrdersPanel() {
               </thead>
               <tbody>
                 {orders.map(order => (
-                  <tr key={order.id} className="border-b border-white/5 last:border-0 hover:bg-white/2 transition-colors">
-                    <td className="px-4 py-3 text-white text-xs font-mono">{order.order_number}</td>
+                  <tr key={order.id} className="border-b border-neutral-100 last:border-0 hover:bg-neutral-50 transition-colors">
+                    <td className="px-4 py-3 text-neutral-800 text-xs font-mono">{order.order_number}</td>
                     <td className="px-4 py-3">
-                      <p className="text-neutral-200 text-xs">{order.customer_name}</p>
+                      <p className="text-neutral-700 text-xs">{order.customer_name}</p>
                       <p className="text-neutral-600 text-xs">{order.customer_email}</p>
                     </td>
                     <td className="px-4 py-3">
                       {(order.order_items || []).length > 0 ? (
                         <div className="space-y-0.5">
                           {(order.order_items || []).map((item: any) => (
-                            <p key={item.id} className="text-neutral-300 text-xs truncate max-w-48">
+                            <p key={item.id} className="text-neutral-600 text-xs truncate max-w-48">
                               {item.product_name} × {item.quantity}
                             </p>
                           ))}
@@ -765,7 +767,7 @@ function OrdersPanel() {
                         <span className="text-neutral-600 text-xs italic">No items</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-white text-xs">{formatPrice(order.total, 'GHS')}</td>
+                    <td className="px-4 py-3 text-neutral-800 text-xs">{formatPrice(order.total, 'GHS')}</td>
                     <td className="px-4 py-3">
                       <span className="text-neutral-400 text-xs capitalize">{order.payment_method.replace(/_/g, ' ')}</span>
                     </td>
@@ -773,16 +775,16 @@ function OrdersPanel() {
                       <select
                         value={order.status}
                         onChange={e => updateStatus(order.id, e.target.value)}
-                        className="bg-transparent text-xs border border-white/10 rounded-lg px-2 py-1 focus:outline-none focus:border-white/30"
+                        className="bg-transparent text-xs border border-neutral-200 rounded-lg px-2 py-1 focus:outline-none focus:border-neutral-400"
                       >
-                        {statuses.map(s => <option key={s} value={s} className="bg-neutral-900">{s}</option>)}
+                        {statuses.map(s => <option key={s} value={s} className='bg-white'>{s}</option>)}
                       </select>
                     </td>
                     <td className="px-4 py-3 text-neutral-500 text-xs">
                       {new Date(order.created_at).toLocaleDateString()}
                     </td>
                     <td className="px-4 py-3">
-                      <button onClick={() => setSelected(order)} className="p-1.5 hover:bg-white/5 rounded text-neutral-400 hover:text-white transition-colors">
+                      <button onClick={() => setSelected(order)} className="p-1.5 hover:bg-neutral-100 rounded text-neutral-500 hover:text-neutral-900 transition-colors">
                         <Eye size={13} />
                       </button>
                     </td>
@@ -825,19 +827,19 @@ function OrdersPanel() {
                     const color = parts.length > 1 ? parts.slice(1).join(' - ') : null;
 
                     return (
-                      <div key={item.id} className="py-3 border-b border-white/5 last:border-0">
+                      <div key={item.id} className="py-3 border-b border-neutral-100 last:border-0">
                         <div className="flex justify-between items-start">
                           <div>
                             <p className="text-neutral-200 text-sm font-medium">{productName}</p>
                             <div className="flex gap-3 mt-1">
                               {color && (
-                                <span className="text-xs text-primary-400">Color: {color}</span>
+                                <span className="text-xs text-primary-500">Color: {color}</span>
                               )}
                               <span className="text-xs text-neutral-500">Qty: {item.quantity}</span>
                               <span className="text-xs text-neutral-500">@ {formatPrice(item.unit_price, 'GHS')} each</span>
                             </div>
                           </div>
-                          <span className="text-white text-sm font-medium">{formatPrice(item.total_price, 'GHS')}</span>
+                          <span className="text-neutral-800 text-sm font-medium">{formatPrice(item.total_price, 'GHS')}</span>
                         </div>
                       </div>
                     );
@@ -908,7 +910,7 @@ function DiscountsPanel() {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-white/5">
+              <tr className="border-b border-neutral-100">
                 {['Code', 'Type', 'Value', 'Min Order', 'Uses', 'Expires', 'Status', ''].map(h => (
                   <th key={h} className="text-left text-neutral-500 text-xs px-4 py-3 font-medium">{h}</th>
                 ))}
@@ -916,23 +918,23 @@ function DiscountsPanel() {
             </thead>
             <tbody>
               {codes.map(code => (
-                <tr key={code.id} className="border-b border-white/5 last:border-0 hover:bg-white/2 transition-colors">
-                  <td className="px-4 py-3 text-white text-xs font-mono font-semibold">{code.code}</td>
+                <tr key={code.id} className="border-b border-neutral-100 last:border-0 hover:bg-neutral-50 transition-colors">
+                  <td className="px-4 py-3 text-neutral-800 text-xs font-mono font-semibold">{code.code}</td>
                   <td className="px-4 py-3 text-neutral-400 text-xs capitalize">{code.discount_type.replace('_', ' ')}</td>
-                  <td className="px-4 py-3 text-primary-400 text-xs font-semibold">
+                  <td className="px-4 py-3 text-primary-500 text-xs font-semibold">
                     {code.discount_type === 'percentage' ? `${code.discount_value}%` : formatPrice(code.discount_value, 'GHS')}
                   </td>
                   <td className="px-4 py-3 text-neutral-400 text-xs">{formatPrice(code.min_purchase_amount, 'GHS')}</td>
                   <td className="px-4 py-3 text-neutral-400 text-xs">{code.current_uses}{code.max_uses ? `/${code.max_uses}` : ''}</td>
                   <td className="px-4 py-3 text-neutral-400 text-xs">{code.expires_at ? new Date(code.expires_at).toLocaleDateString() : 'Never'}</td>
                   <td className="px-4 py-3">
-                    <span className={`px-2 py-0.5 rounded-full text-xs ${code.is_active ? 'bg-success-500/10 text-success-400' : 'bg-neutral-800 text-neutral-500'}`}>
+                    <span className={`px-2 py-0.5 rounded-full text-xs ${code.is_active ? 'bg-success-500/10 text-success-400' : 'bg-neutral-100 text-neutral-500'}`}>
                       {code.is_active ? 'Active' : 'Inactive'}
                     </span>
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-1">
-                      <button onClick={() => toggle(code.id, code.is_active)} className="p-1.5 hover:bg-white/5 rounded text-neutral-400 hover:text-white transition-colors">
+                      <button onClick={() => toggle(code.id, code.is_active)} className="p-1.5 hover:bg-neutral-100 rounded text-neutral-500 hover:text-neutral-900 transition-colors">
                         {code.is_active ? <EyeOff size={13} /> : <Eye size={13} />}
                       </button>
                       <button onClick={() => del(code.id)} className="p-1.5 hover:bg-error-500/10 rounded text-neutral-400 hover:text-error-400 transition-colors">
@@ -1058,17 +1060,17 @@ function BannersPanel() {
               <img src={`${banner.image_url}?auto=compress&w=80`} alt="" className="w-14 h-10 object-cover rounded-lg" />
             )}
             <div className="flex-1 min-w-0">
-              <p className="text-white text-sm font-medium">{banner.title}</p>
+              <p className="text-neutral-800 text-sm font-medium">{banner.title}</p>
               <p className="text-neutral-500 text-xs capitalize">{banner.banner_type} • {banner.subtitle}</p>
             </div>
-            <span className={`px-2 py-0.5 rounded-full text-xs shrink-0 ${banner.is_active ? 'bg-success-500/10 text-success-400' : 'bg-neutral-800 text-neutral-500'}`}>
+            <span className={`px-2 py-0.5 rounded-full text-xs shrink-0 ${banner.is_active ? 'bg-success-500/10 text-success-400' : 'bg-neutral-100 text-neutral-500'}`}>
               {banner.is_active ? 'Active' : 'Hidden'}
             </span>
             <div className="flex gap-1">
-              <button onClick={() => toggle(banner.id, banner.is_active)} className="p-1.5 hover:bg-white/5 rounded text-neutral-400 hover:text-white transition-colors">
+              <button onClick={() => toggle(banner.id, banner.is_active)} className="p-1.5 hover:bg-neutral-100 rounded text-neutral-500 hover:text-neutral-900 transition-colors">
                 {banner.is_active ? <EyeOff size={13} /> : <Eye size={13} />}
               </button>
-              <button onClick={() => openEdit(banner)} className="p-1.5 hover:bg-white/5 rounded text-neutral-400 hover:text-white transition-colors">
+              <button onClick={() => openEdit(banner)} className="p-1.5 hover:bg-neutral-100 rounded text-neutral-500 hover:text-neutral-900 transition-colors">
                 <Edit2 size={13} />
               </button>
               <button onClick={() => del(banner.id)} className="p-1.5 hover:bg-error-500/10 rounded text-neutral-400 hover:text-error-400 transition-colors">
@@ -1144,7 +1146,7 @@ function Modal({ title, children, onClose }: { title: string; children: React.Re
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 bg-neutral-800/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <motion.div
@@ -1155,8 +1157,8 @@ function Modal({ title, children, onClose }: { title: string; children: React.Re
         className="w-full max-w-lg glass-dark rounded-2xl overflow-hidden max-h-[90vh] flex flex-col"
       >
         <div className="flex items-center justify-between p-5 border-b border-white/10">
-          <h3 className="text-white font-semibold">{title}</h3>
-          <button onClick={onClose} className="p-1.5 hover:bg-white/5 rounded-lg text-neutral-400 hover:text-white transition-colors">
+          <h3 className="text-neutral-900 font-semibold">{title}</h3>
+          <button onClick={onClose} className="p-1.5 hover:bg-neutral-100 rounded-lg text-neutral-500 hover:text-neutral-900 transition-colors">
             <X size={16} />
           </button>
         </div>
@@ -1169,8 +1171,8 @@ function Modal({ title, children, onClose }: { title: string; children: React.Re
 function StatusBadge({ status }: { status: string }) {
   const colors: Record<string, string> = {
     pending: 'bg-warning-500/10 text-warning-400',
-    confirmed: 'bg-primary-500/10 text-primary-400',
-    processing: 'bg-accent-500/10 text-accent-400',
+    confirmed: 'bg-primary-500/10 text-primary-500',
+    processing: 'bg-warning-500/10 text-warning-500',
     shipped: 'bg-success-500/10 text-success-400',
     delivered: 'bg-success-500/20 text-success-300',
     cancelled: 'bg-error-500/10 text-error-400',
@@ -1192,7 +1194,9 @@ function Info2({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <p className="text-neutral-500 text-xs mb-0.5">{label}</p>
-      <p className="text-white text-sm">{value}</p>
+      <p className="text-neutral-800 text-sm">{value}</p>
     </div>
   );
 }
+
+

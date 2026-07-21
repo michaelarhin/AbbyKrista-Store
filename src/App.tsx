@@ -23,7 +23,7 @@ export default function App() {
       <AuthProvider>
         <CurrencyProvider>
           <CartProvider>
-            <div className="min-h-screen bg-neutral-950 grain">
+            <div className="min-h-screen" style={{ backgroundColor: '#fff9f9' }}>
               <Header />
               <main>
                 <Routes>
