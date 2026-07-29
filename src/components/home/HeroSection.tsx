@@ -58,7 +58,7 @@ export default function HeroSection() {
 
             {/* Subtext */}
             <p className="text-neutral-700 text-lg md:text-xl leading-relaxed mb-10 max-w-lg">
-              AbbyKrista Outlet is your one-stop shop for stylish, affordable everyday essentials and fashion pieces. We source your favourite designer items and home finds — and deliver them safely to your doorstep.
+              Abby Krista Outlet is your one-stop shop for stylish, affordable everyday essentials and fashion items. We source your favourite designer pieces & home finds and ship them safely to your doorstep.
             </p>
 
             {/* CTAs */}
