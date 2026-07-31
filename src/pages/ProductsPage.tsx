@@ -103,7 +103,7 @@ export default function ProductsPage() {
             All
           </button>
           {categories
-            .filter(cat => ['abbyhaus', 'fashion', 'accessories', 'gadgets', 'preorder', 'shoes', 'glasses', 'dress', 'decor', 'bags', 'jewelry', 'hair-accessories'].includes(cat.slug))
+            .filter(cat => ['abbyhaus', 'shades-by-abby', 'preorder'].includes(cat.slug))
             .map(cat => (
             <button
               key={cat.id}

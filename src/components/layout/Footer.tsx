@@ -85,7 +85,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pb-16 border-b border-cream-200">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-8 pb-16 border-b border-cream-200">
           <div>
             <h4 className="text-neutral-900 text-sm font-semibold mb-4 tracking-wide">ABBYHAUS</h4>
             <ul className="space-y-3">
@@ -99,11 +99,11 @@ export default function Footer() {
             </ul>
           </div>
           <div>
-            <h4 className="text-neutral-900 text-sm font-semibold mb-4 tracking-wide">Fashion</h4>
+            <h4 className="text-neutral-900 text-sm font-semibold mb-4 tracking-wide">Shades by Abby</h4>
             <ul className="space-y-3">
-              {['Bags', 'Shoes', 'Shades', 'Jewelry', 'Hair Bands'].map(item => (
+              {['Sunglasses', 'Cat-Eye', 'Shield Frames', 'Blue Light'].map(item => (
                 <li key={item}>
-                  <Link to="/products?category=fashion" className="text-neutral-500 hover:text-primary-500 text-sm transition-colors">
+                  <Link to="/products?category=shades-by-abby" className="text-neutral-500 hover:text-primary-500 text-sm transition-colors">
                     {item}
                   </Link>
                 </li>
@@ -111,21 +111,11 @@ export default function Footer() {
             </ul>
           </div>
           <div>
-            <h4 className="text-neutral-900 text-sm font-semibold mb-4 tracking-wide">More</h4>
+            <h4 className="text-neutral-900 text-sm font-semibold mb-4 tracking-wide">Preorder</h4>
             <ul className="space-y-3">
               <li>
-                <Link to="/products?category=accessories" className="text-neutral-500 hover:text-primary-500 text-sm transition-colors">
-                  Accessories
-                </Link>
-              </li>
-              <li>
-                <Link to="/products?category=gadgets" className="text-neutral-500 hover:text-primary-500 text-sm transition-colors">
-                  Gadgets
-                </Link>
-              </li>
-              <li>
                 <Link to="/products?category=preorder" className="text-neutral-500 hover:text-primary-500 text-sm transition-colors">
-                  Preorder
+                  All Preorders
                 </Link>
               </li>
             </ul>

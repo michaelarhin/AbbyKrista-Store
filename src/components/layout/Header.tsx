@@ -27,9 +27,7 @@ export default function Header() {
   const navLinks = [
     { label: 'Shop All', href: '/products' },
     { label: 'ABBYHAUS', href: '/products?category=abbyhaus' },
-    { label: 'Fashion', href: '/products?category=fashion' },
-    { label: 'Gadgets', href: '/products?category=gadgets' },
-    { label: 'Accessories', href: '/products?category=accessories' },
+    { label: 'Shades by Abby', href: '/products?category=shades-by-abby' },
     { label: 'Preorder', href: '/products?category=preorder' },
   ];
 

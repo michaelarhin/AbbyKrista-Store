@@ -5,7 +5,7 @@ import { ArrowRight } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import type { Category } from '../../types';
 
-const ALLOWED_SLUGS = ['abbyhaus', 'fashion', 'accessories', 'gadgets', 'preorder'];
+const ALLOWED_SLUGS = ['abbyhaus', 'shades-by-abby', 'preorder'];
 
 export default function CategorySection() {
   const [categories, setCategories] = useState<Category[]>([]);

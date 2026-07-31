@@ -52,7 +52,7 @@ export default function CategoriesPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {categories
-              .filter(cat => ['abbyhaus', 'fashion', 'accessories', 'gadgets', 'preorder', 'shoes', 'glasses', 'dress', 'decor', 'bags', 'jewelry', 'hair-accessories'].includes(cat.slug))
+              .filter(cat => ['abbyhaus', 'shades-by-abby', 'preorder'].includes(cat.slug))
               .map((cat, i) => {
               const imageUrl = cat.image_url || CATEGORY_IMAGES[cat.slug] || '';
               return (
