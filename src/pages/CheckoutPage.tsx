@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { ArrowLeft, CheckCircle, Smartphone, Package, Tag, ChevronDown, ChevronUp, Info } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, CheckCircle, XCircle, AlertCircle, Loader2, Smartphone, Package, Tag, ChevronDown, ChevronUp, Info } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
 import { useCurrency } from '../contexts/CurrencyContext';
 import { formatPrice } from '../lib/utils';
@@ -44,6 +44,10 @@ export default function CheckoutPage() {
   const [orderSummaryOpen, setOrderSummaryOpen] = useState(false);
   const [paymentError, setPaymentError] = useState('');
   const [pendingOrderNumber, setPendingOrderNumber] = useState<string | null>(null);
+  const [toast, setToast] = useState<ToastState | null>(null);
+
+  const showToast = (t: ToastState) => setToast(t);
+  const dismissToast = () => setToast(null);
 
   const shippingCost = 0;
   const discountAmount = discountResult?.amount || 0;
@@ -218,6 +222,13 @@ export default function CheckoutPage() {
     }
     setPendingOrderNumber(orderNumber);
 
+    // Show processing toast while the payment modal opens
+    showToast({
+      type: 'processing',
+      title: 'Opening payment…',
+      message: 'Please complete your Mobile Money payment in the window that appears.',
+    });
+
     let paymentCompleted = false;
 
     // Step 2: Open Paystack payment
@@ -257,6 +268,12 @@ export default function CheckoutPage() {
           .update({ payment_status: 'paid', notes: `Paystack Ref: ${response.reference}` })
           .eq('order_number', orderNumber);
 
+        showToast({
+          type: 'success',
+          title: 'Order placed successfully!',
+          message: `Your order ${orderNumber} has been confirmed. We'll be in touch shortly.`,
+        });
+
         clearCart();
         setPendingOrderNumber(null);
         setOrderSuccess(orderNumber!);
@@ -271,6 +288,11 @@ export default function CheckoutPage() {
         await reverseOrderSideEffects();
         setPendingOrderNumber(null);
         setPaymentError('Payment was cancelled. No charges were made.');
+        showToast({
+          type: 'cancelled',
+          title: 'Payment cancelled',
+          message: 'You cancelled the payment. No charges were made. You can try again anytime.',
+        });
         setSubmitting(false);
       },
       onClose: async () => {
@@ -283,6 +305,11 @@ export default function CheckoutPage() {
           await reverseOrderSideEffects();
           setPendingOrderNumber(null);
           setPaymentError('Payment did not go through. Please try again or contact us for help.');
+          showToast({
+            type: 'failed',
+            title: 'Payment failed',
+            message: 'Your payment did not go through. No charges were made. Please try again or contact us.',
+          });
           setSubmitting(false);
         }
       },
@@ -343,6 +370,7 @@ export default function CheckoutPage() {
 
   return (
     <div className="min-h-screen pt-20 pb-24">
+      <ToastContainer toast={toast} onDismiss={dismissToast} />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
         <div className="flex items-center gap-3 mb-8">
           <Link to="/products" className="p-2 hover:bg-neutral-100 rounded-lg text-neutral-500 hover:text-neutral-800 transition-colors">
@@ -602,3 +630,103 @@ function Field({ label, required, children }: { label: string; required?: boolea
   );
 }
 
+// ─── Toast ────────────────────────────────────────────────────────────────────
+
+type ToastType = 'processing' | 'success' | 'cancelled' | 'failed';
+
+interface ToastState {
+  type: ToastType;
+  title: string;
+  message: string;
+}
+
+const TOAST_CONFIG: Record<ToastType, { icon: React.FC<any>; iconClass: string; barClass: string; bg: string }> = {
+  processing: {
+    icon: Loader2,
+    iconClass: 'text-primary-400 animate-spin',
+    barClass: 'bg-primary-400',
+    bg: 'bg-white border-primary-200',
+  },
+  success: {
+    icon: CheckCircle,
+    iconClass: 'text-success-500',
+    barClass: 'bg-success-500',
+    bg: 'bg-white border-success-200',
+  },
+  cancelled: {
+    icon: AlertCircle,
+    iconClass: 'text-warning-500',
+    barClass: 'bg-warning-500',
+    bg: 'bg-white border-warning-200',
+  },
+  failed: {
+    icon: XCircle,
+    iconClass: 'text-error-500',
+    barClass: 'bg-error-500',
+    bg: 'bg-white border-error-200',
+  },
+};
+
+function Toast({ toast, onDismiss }: { toast: ToastState; onDismiss: () => void }) {
+  const config = TOAST_CONFIG[toast.type];
+  const Icon = config.icon;
+  // Auto-dismiss after 6 s for non-processing toasts
+  useEffect(() => {
+    if (toast.type === 'processing') return;
+    const t = setTimeout(onDismiss, 6000);
+    return () => clearTimeout(t);
+  }, [toast.type, onDismiss]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -24, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: -16, scale: 0.95 }}
+      transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+      className={`relative flex items-start gap-3 w-full max-w-sm rounded-2xl border shadow-xl px-4 pt-4 pb-3 overflow-hidden ${config.bg}`}
+    >
+      {/* progress bar */}
+      {toast.type !== 'processing' && (
+        <motion.div
+          className={`absolute bottom-0 left-0 h-1 rounded-full ${config.barClass}`}
+          initial={{ width: '100%' }}
+          animate={{ width: '0%' }}
+          transition={{ duration: 6, ease: 'linear' }}
+        />
+      )}
+
+      <div className={`shrink-0 mt-0.5 ${config.iconClass}`}>
+        <Icon size={20} />
+      </div>
+
+      <div className="flex-1 min-w-0">
+        <p className="text-neutral-900 text-sm font-semibold leading-snug">{toast.title}</p>
+        <p className="text-neutral-500 text-xs mt-0.5 leading-relaxed">{toast.message}</p>
+      </div>
+
+      {toast.type !== 'processing' && (
+        <button
+          onClick={onDismiss}
+          className="shrink-0 text-neutral-400 hover:text-neutral-700 transition-colors mt-0.5"
+          aria-label="Dismiss"
+        >
+          <XCircle size={16} />
+        </button>
+      )}
+    </motion.div>
+  );
+}
+
+function ToastContainer({ toast, onDismiss }: { toast: ToastState | null; onDismiss: () => void }) {
+  return (
+    <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[9999] w-full max-w-sm px-4 pointer-events-none">
+      <AnimatePresence mode="wait">
+        {toast && (
+          <div className="pointer-events-auto">
+            <Toast key={toast.type + toast.title} toast={toast} onDismiss={onDismiss} />
+          </div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
