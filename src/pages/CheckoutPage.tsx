@@ -174,6 +174,34 @@ export default function CheckoutPage() {
     return order.order_number;
   };
 
+  // Restore stock and discount usage when an order is cancelled/failed before payment
+  const reverseOrderSideEffects = async () => {
+    for (const item of items) {
+      const newQuantity = item.product.stock_quantity; // original quantity (not yet decremented since we track it locally)
+      await supabase
+        .from('products')
+        .update({ stock_quantity: item.product.stock_quantity })
+        .eq('id', item.product.id);
+    }
+    if (discountResult) {
+      try {
+        const { data: dcRow } = await supabase
+          .from('discount_codes')
+          .select('current_uses')
+          .eq('id', discountResult.id)
+          .single();
+        if (dcRow && dcRow.current_uses > 0) {
+          await supabase
+            .from('discount_codes')
+            .update({ current_uses: dcRow.current_uses - 1 })
+            .eq('id', discountResult.id);
+        }
+      } catch {
+        // Non-critical
+      }
+    }
+  };
+
   const initiatePaystackPayment = async () => {
     if (!window.PaystackPop) {
       setPaymentError('Payment system is loading. Please try again.');
@@ -181,17 +209,16 @@ export default function CheckoutPage() {
       return;
     }
 
-    // Prevent duplicate orders — reuse pending order if one exists
-    let orderNumber = pendingOrderNumber;
+    // Always create a fresh order for each attempt
+    // (cancelled/failed orders are marked as such and should not be reused)
+    const orderNumber = await saveOrder('pending');
     if (!orderNumber) {
-      // Step 1: Save order as "pending" FIRST — before payment
-      orderNumber = await saveOrder('pending');
-      if (!orderNumber) {
-        setSubmitting(false);
-        return;
-      }
-      setPendingOrderNumber(orderNumber);
+      setSubmitting(false);
+      return;
     }
+    setPendingOrderNumber(orderNumber);
+
+    let paymentCompleted = false;
 
     // Step 2: Open Paystack payment
     const handler = window.PaystackPop.setup({
@@ -223,7 +250,8 @@ export default function CheckoutPage() {
         ],
       },
       onSuccess: async (response: { reference: string }) => {
-        // Step 3: Update order to "paid"
+        paymentCompleted = true;
+        // Update order to paid
         await supabase
           .from('orders')
           .update({ payment_status: 'paid', notes: `Paystack Ref: ${response.reference}` })
@@ -234,10 +262,29 @@ export default function CheckoutPage() {
         setOrderSuccess(orderNumber!);
         setSubmitting(false);
       },
-      onCancel: () => {
-        // Order stays as "pending" in database — admin can see it was attempted
-        setPaymentError('Payment was cancelled. Your order has been saved — please try paying again or contact us.');
+      onCancel: async () => {
+        // User explicitly cancelled — mark order as cancelled
+        await supabase
+          .from('orders')
+          .update({ payment_status: 'failed', status: 'cancelled' })
+          .eq('order_number', orderNumber);
+        await reverseOrderSideEffects();
+        setPendingOrderNumber(null);
+        setPaymentError('Payment was cancelled. No charges were made.');
         setSubmitting(false);
+      },
+      onClose: async () => {
+        // Modal closed without a successful payment (covers failures and dismissals)
+        if (!paymentCompleted) {
+          await supabase
+            .from('orders')
+            .update({ payment_status: 'failed', status: 'cancelled' })
+            .eq('order_number', orderNumber);
+          await reverseOrderSideEffects();
+          setPendingOrderNumber(null);
+          setPaymentError('Payment did not go through. Please try again or contact us for help.');
+          setSubmitting(false);
+        }
       },
     });
 

@@ -769,7 +769,7 @@ function OrdersPanel() {
                     </td>
                     <td className="px-4 py-3 text-neutral-800 text-xs">{formatPrice(order.total, 'GHS')}</td>
                     <td className="px-4 py-3">
-                      <span className="text-neutral-400 text-xs capitalize">{order.payment_method.replace(/_/g, ' ')}</span>
+                      <PaymentStatusBadge status={order.payment_status} />
                     </td>
                     <td className="px-4 py-3">
                       <select
@@ -807,7 +807,13 @@ function OrdersPanel() {
                 <Info2 label="Customer" value={selected.customer_name} />
                 <Info2 label="Email" value={selected.customer_email} />
                 <Info2 label="Phone" value={selected.customer_phone} />
-                <Info2 label="Payment" value={selected.payment_method.replace(/_/g, ' ')} />
+                <Info2 label="Payment Method" value={selected.payment_method.replace(/_/g, ' ')} />
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-neutral-500 text-xs">Payment Status:</span>
+                <PaymentStatusBadge status={selected.payment_status} />
+                <span className="text-neutral-500 text-xs ml-4">Order Status:</span>
+                <StatusBadge status={selected.status} />
               </div>
               {selected.shipping_address && (
                 <Info2
@@ -1176,6 +1182,20 @@ function StatusBadge({ status }: { status: string }) {
     shipped: 'bg-success-500/10 text-success-400',
     delivered: 'bg-success-500/20 text-success-300',
     cancelled: 'bg-error-500/10 text-error-400',
+  };
+  return (
+    <span className={`px-2 py-0.5 rounded-full text-xs capitalize ${colors[status] || 'bg-neutral-800 text-neutral-400'}`}>
+      {status}
+    </span>
+  );
+}
+
+function PaymentStatusBadge({ status }: { status: string }) {
+  const colors: Record<string, string> = {
+    pending: 'bg-warning-500/10 text-warning-400',
+    paid: 'bg-success-500/10 text-success-400',
+    failed: 'bg-error-500/10 text-error-400',
+    refunded: 'bg-neutral-500/10 text-neutral-400',
   };
   return (
     <span className={`px-2 py-0.5 rounded-full text-xs capitalize ${colors[status] || 'bg-neutral-800 text-neutral-400'}`}>
