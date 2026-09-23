@@ -212,7 +212,13 @@ export default function CheckoutPage() {
 
   const initiatePaystackPayment = async () => {
     if (!window.PaystackPop) {
-      setPaymentError('Payment system is loading. Please try again.');
+      setPaymentError('Payment system is loading. Please refresh and try again.');
+      setSubmitting(false);
+      return;
+    }
+
+    if (!PAYSTACK_KEY) {
+      setPaymentError('Payment is not configured. Please contact us to complete your order.');
       setSubmitting(false);
       return;
     }
@@ -224,8 +230,11 @@ export default function CheckoutPage() {
     let paymentCompleted = false;
     let callbackFired = false;
 
-    // Kick off DB order creation in the background (non-blocking)
-    const savePromise = saveOrder('pending', undefined, undefined, orderNumber);
+    // Kick off DB order creation in the background — MUST never throw
+    const savePromise = saveOrder('pending', undefined, undefined, orderNumber).catch(err => {
+      console.error('Background saveOrder failed:', err);
+      return null;
+    });
 
     // Helper: clear processing state and show the outcome toast
     const settle = (toastData: ToastState, error?: string) => {
@@ -237,7 +246,7 @@ export default function CheckoutPage() {
       setPendingOrderNumber(null);
     };
 
-    // Fallback: if no callback fires within 45s, release the UI
+    // Fallback: if no Paystack callback fires within 45s, release the UI
     const fallbackTimer = setTimeout(() => {
       if (!callbackFired) {
         dismissToast();
@@ -245,54 +254,41 @@ export default function CheckoutPage() {
       }
     }, 45000);
 
-    const handler = window.PaystackPop.setup({
-      key: PAYSTACK_KEY,
-      email: form.customer_email,
-      amount: Math.round(total * 100),
-      currency: 'GHS',
-      channels: ['mobile_money'],
-      metadata: {
-        customer_name: form.customer_name,
-        customer_phone: form.customer_phone,
-        order_number: orderNumber,
-        custom_fields: [
-          { display_name: 'Customer Name', variable_name: 'customer_name', value: form.customer_name },
-          { display_name: 'Phone Number',  variable_name: 'phone',          value: form.customer_phone },
-          { display_name: 'Order Number',  variable_name: 'order_number',   value: orderNumber },
-        ],
-      },
-      onSuccess: async (response: { reference: string }) => {
-        clearTimeout(fallbackTimer);
-        paymentCompleted = true;
-        await savePromise;
-        await supabase
-          .from('orders')
-          .update({ payment_status: 'paid', notes: `Paystack Ref: ${response.reference}` })
-          .eq('order_number', orderNumber);
-        clearCart();
-        settle({
-          type: 'success',
-          title: 'Order placed successfully!',
-          message: `Your order ${orderNumber} has been confirmed. We'll be in touch shortly.`,
-        });
-        setOrderSuccess(orderNumber!);
-      },
-      onCancel: async () => {
-        clearTimeout(fallbackTimer);
-        await savePromise;
-        await supabase
-          .from('orders')
-          .update({ payment_status: 'failed', status: 'cancelled' })
-          .eq('order_number', orderNumber);
-        await reverseOrderSideEffects();
-        settle(
-          { type: 'cancelled', title: 'Payment cancelled', message: 'You cancelled the payment. No charges were made.' },
-          'Payment was cancelled. No charges were made.',
-        );
-      },
-      onClose: async () => {
-        clearTimeout(fallbackTimer);
-        if (!paymentCompleted) {
+    try {
+      const handler = window.PaystackPop.setup({
+        key: PAYSTACK_KEY,
+        email: form.customer_email,
+        amount: Math.round(total * 100),
+        currency: 'GHS',
+        channels: ['mobile_money'],
+        metadata: {
+          customer_name: form.customer_name,
+          customer_phone: form.customer_phone,
+          order_number: orderNumber,
+          custom_fields: [
+            { display_name: 'Customer Name', variable_name: 'customer_name', value: form.customer_name },
+            { display_name: 'Phone Number',  variable_name: 'phone',          value: form.customer_phone },
+            { display_name: 'Order Number',  variable_name: 'order_number',   value: orderNumber },
+          ],
+        },
+        onSuccess: async (response: { reference: string }) => {
+          clearTimeout(fallbackTimer);
+          paymentCompleted = true;
+          await savePromise;
+          await supabase
+            .from('orders')
+            .update({ payment_status: 'paid', notes: `Paystack Ref: ${response.reference}` })
+            .eq('order_number', orderNumber);
+          clearCart();
+          settle({
+            type: 'success',
+            title: 'Order placed successfully!',
+            message: `Your order ${orderNumber} has been confirmed. We'll be in touch shortly.`,
+          });
+          setOrderSuccess(orderNumber!);
+        },
+        onCancel: async () => {
+          clearTimeout(fallbackTimer);
           await savePromise;
           await supabase
             .from('orders')
@@ -300,20 +296,41 @@ export default function CheckoutPage() {
             .eq('order_number', orderNumber);
           await reverseOrderSideEffects();
           settle(
-            { type: 'failed', title: 'Payment failed', message: 'Your payment did not go through. No charges were made. Please try again or contact us.' },
-            'Payment did not go through. Please try again or contact us for help.',
+            { type: 'cancelled', title: 'Payment cancelled', message: 'You cancelled the payment. No charges were made.' },
+            'Payment was cancelled. No charges were made.',
           );
-        }
-      },
-    });
+        },
+        onClose: async () => {
+          clearTimeout(fallbackTimer);
+          if (!paymentCompleted) {
+            await savePromise;
+            await supabase
+              .from('orders')
+              .update({ payment_status: 'failed', status: 'cancelled' })
+              .eq('order_number', orderNumber);
+            await reverseOrderSideEffects();
+            settle(
+              { type: 'failed', title: 'Payment failed', message: 'Your payment did not go through. No charges were made. Please try again or contact us.' },
+              'Payment did not go through. Please try again or contact us for help.',
+            );
+          }
+        },
+      });
 
-    // Show toast then open iframe — both synchronous from the user gesture
-    showToast({
-      type: 'processing',
-      title: 'Opening payment…',
-      message: 'Please complete your Mobile Money payment in the window that appears.',
-    });
-    handler.openIframe();
+      // Show toast then open iframe — synchronous from the user gesture
+      showToast({
+        type: 'processing',
+        title: 'Opening payment…',
+        message: 'Please complete your Mobile Money payment in the window that appears.',
+      });
+      handler.openIframe();
+    } catch (err) {
+      clearTimeout(fallbackTimer);
+      console.error('Paystack setup error:', err);
+      setPaymentError('Could not open payment. Please refresh and try again.');
+      setSubmitting(false);
+      dismissToast();
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
