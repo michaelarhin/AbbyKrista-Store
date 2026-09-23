@@ -92,7 +92,7 @@ export default function CheckoutPage() {
     setCheckingDiscount(false);
   };
 
-  const saveOrder = async (paymentStatus: string, paystackRef?: string, orderId?: string) => {
+  const saveOrder = async (paymentStatus: string, paystackRef?: string, orderId?: string, preGeneratedOrderNumber?: string) => {
     // If we already have an order ID, just update the payment status
     if (orderId) {
       await supabase
@@ -102,7 +102,7 @@ export default function CheckoutPage() {
       return orderId;
     }
 
-    const orderNumber = `AK-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+    const orderNumber = preGeneratedOrderNumber ?? `AK-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
 
     const { data: order, error } = await supabase
       .from('orders')
@@ -213,25 +213,20 @@ export default function CheckoutPage() {
       return;
     }
 
-    // Always create a fresh order for each attempt
-    // (cancelled/failed orders are marked as such and should not be reused)
-    const orderNumber = await saveOrder('pending');
-    if (!orderNumber) {
-      setSubmitting(false);
-      return;
-    }
+    // Generate order number synchronously so openIframe() fires immediately
+    // inside the user gesture — async DB work MUST NOT block it on mobile
+    const orderNumber = `AK-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
     setPendingOrderNumber(orderNumber);
 
-    // Show processing toast while the payment modal opens
-    showToast({
-      type: 'processing',
-      title: 'Opening payment…',
-      message: 'Please complete your Mobile Money payment in the window that appears.',
+    let paymentCompleted = false;
+    // Track whether the DB order was successfully created
+    let orderSaved = false;
+
+    // Kick off order creation in the background (non-blocking)
+    const savePromise = saveOrder('pending', undefined, undefined, orderNumber).then(result => {
+      orderSaved = !!result;
     });
 
-    let paymentCompleted = false;
-
-    // Step 2: Open Paystack payment
     const handler = window.PaystackPop.setup({
       key: PAYSTACK_KEY,
       email: form.customer_email,
@@ -262,7 +257,8 @@ export default function CheckoutPage() {
       },
       onSuccess: async (response: { reference: string }) => {
         paymentCompleted = true;
-        // Update order to paid
+        // Wait for order save to finish before updating status
+        await savePromise;
         await supabase
           .from('orders')
           .update({ payment_status: 'paid', notes: `Paystack Ref: ${response.reference}` })
@@ -280,7 +276,7 @@ export default function CheckoutPage() {
         setSubmitting(false);
       },
       onCancel: async () => {
-        // User explicitly cancelled — mark order as cancelled
+        await savePromise;
         await supabase
           .from('orders')
           .update({ payment_status: 'failed', status: 'cancelled' })
@@ -296,8 +292,8 @@ export default function CheckoutPage() {
         setSubmitting(false);
       },
       onClose: async () => {
-        // Modal closed without a successful payment (covers failures and dismissals)
         if (!paymentCompleted) {
+          await savePromise;
           await supabase
             .from('orders')
             .update({ payment_status: 'failed', status: 'cancelled' })
@@ -315,6 +311,12 @@ export default function CheckoutPage() {
       },
     });
 
+    // Show toast and open iframe immediately — no await before this point
+    showToast({
+      type: 'processing',
+      title: 'Opening payment…',
+      message: 'Please complete your Mobile Money payment in the window that appears.',
+    });
     handler.openIframe();
   };
 
