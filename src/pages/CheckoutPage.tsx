@@ -262,57 +262,58 @@ export default function CheckoutPage() {
         currency: 'GHS',
         channels: ['mobile_money'],
         metadata: {
-          customer_name: form.customer_name,
-          customer_phone: form.customer_phone,
-          order_number: orderNumber,
           custom_fields: [
             { display_name: 'Customer Name', variable_name: 'customer_name', value: form.customer_name },
             { display_name: 'Phone Number',  variable_name: 'phone',          value: form.customer_phone },
             { display_name: 'Order Number',  variable_name: 'order_number',   value: orderNumber },
           ],
         },
-        onSuccess: async (response: { reference: string }) => {
+        onSuccess: (response: { reference: string }) => {
           clearTimeout(fallbackTimer);
           paymentCompleted = true;
-          await savePromise;
-          await supabase
-            .from('orders')
-            .update({ payment_status: 'paid', notes: `Paystack Ref: ${response.reference}` })
-            .eq('order_number', orderNumber);
-          clearCart();
-          settle({
-            type: 'success',
-            title: 'Order placed successfully!',
-            message: `Your order ${orderNumber} has been confirmed. We'll be in touch shortly.`,
+          savePromise.then(() =>
+            supabase
+              .from('orders')
+              .update({ payment_status: 'paid', notes: `Paystack Ref: ${response.reference}` })
+              .eq('order_number', orderNumber)
+          ).then(() => {
+            clearCart();
+            settle({
+              type: 'success',
+              title: 'Order placed successfully!',
+              message: `Your order ${orderNumber} has been confirmed. We'll be in touch shortly.`,
+            });
+            setOrderSuccess(orderNumber!);
           });
-          setOrderSuccess(orderNumber!);
         },
-        onCancel: async () => {
+        onCancel: () => {
           clearTimeout(fallbackTimer);
-          await savePromise;
-          await supabase
-            .from('orders')
-            .update({ payment_status: 'failed', status: 'cancelled' })
-            .eq('order_number', orderNumber);
-          await reverseOrderSideEffects();
-          settle(
-            { type: 'cancelled', title: 'Payment cancelled', message: 'You cancelled the payment. No charges were made.' },
-            'Payment was cancelled. No charges were made.',
-          );
-        },
-        onClose: async () => {
-          clearTimeout(fallbackTimer);
-          if (!paymentCompleted) {
-            await savePromise;
-            await supabase
+          savePromise.then(() =>
+            supabase
               .from('orders')
               .update({ payment_status: 'failed', status: 'cancelled' })
-              .eq('order_number', orderNumber);
-            await reverseOrderSideEffects();
+              .eq('order_number', orderNumber)
+          ).then(() => reverseOrderSideEffects()).then(() => {
             settle(
-              { type: 'failed', title: 'Payment failed', message: 'Your payment did not go through. No charges were made. Please try again or contact us.' },
-              'Payment did not go through. Please try again or contact us for help.',
+              { type: 'cancelled', title: 'Payment cancelled', message: 'You cancelled the payment. No charges were made.' },
+              'Payment was cancelled. No charges were made.',
             );
+          });
+        },
+        onClose: () => {
+          clearTimeout(fallbackTimer);
+          if (!paymentCompleted) {
+            savePromise.then(() =>
+              supabase
+                .from('orders')
+                .update({ payment_status: 'failed', status: 'cancelled' })
+                .eq('order_number', orderNumber)
+            ).then(() => reverseOrderSideEffects()).then(() => {
+              settle(
+                { type: 'failed', title: 'Payment failed', message: 'Your payment did not go through. No charges were made. Please try again or contact us.' },
+                'Payment did not go through. Please try again or contact us for help.',
+              );
+            });
           }
         },
       });
