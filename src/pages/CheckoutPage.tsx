@@ -48,6 +48,10 @@ export default function CheckoutPage() {
 
   const showToast = (t: ToastState) => setToast(t);
   const dismissToast = () => setToast(null);
+  const dismissProcessingToast = () => {
+    setToast(null);
+    setSubmitting(false);
+  };
 
   const shippingCost = 0;
   const discountAmount = discountResult?.amount || 0;
@@ -213,19 +217,33 @@ export default function CheckoutPage() {
       return;
     }
 
-    // Generate order number synchronously so openIframe() fires immediately
-    // inside the user gesture — async DB work MUST NOT block it on mobile
+    // Generate order number synchronously — no await before openIframe()
     const orderNumber = `AK-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
     setPendingOrderNumber(orderNumber);
 
     let paymentCompleted = false;
-    // Track whether the DB order was successfully created
-    let orderSaved = false;
+    let callbackFired = false;
 
-    // Kick off order creation in the background (non-blocking)
-    const savePromise = saveOrder('pending', undefined, undefined, orderNumber).then(result => {
-      orderSaved = !!result;
-    });
+    // Kick off DB order creation in the background (non-blocking)
+    const savePromise = saveOrder('pending', undefined, undefined, orderNumber);
+
+    // Helper: clear processing state and show the outcome toast
+    const settle = (toastData: ToastState, error?: string) => {
+      callbackFired = true;
+      dismissToast();
+      if (error) setPaymentError(error);
+      showToast(toastData);
+      setSubmitting(false);
+      setPendingOrderNumber(null);
+    };
+
+    // Fallback: if no callback fires within 45s, release the UI
+    const fallbackTimer = setTimeout(() => {
+      if (!callbackFired) {
+        dismissToast();
+        setSubmitting(false);
+      }
+    }, 45000);
 
     const handler = window.PaystackPop.setup({
       key: PAYSTACK_KEY,
@@ -238,60 +256,42 @@ export default function CheckoutPage() {
         customer_phone: form.customer_phone,
         order_number: orderNumber,
         custom_fields: [
-          {
-            display_name: 'Customer Name',
-            variable_name: 'customer_name',
-            value: form.customer_name,
-          },
-          {
-            display_name: 'Phone Number',
-            variable_name: 'phone',
-            value: form.customer_phone,
-          },
-          {
-            display_name: 'Order Number',
-            variable_name: 'order_number',
-            value: orderNumber,
-          },
+          { display_name: 'Customer Name', variable_name: 'customer_name', value: form.customer_name },
+          { display_name: 'Phone Number',  variable_name: 'phone',          value: form.customer_phone },
+          { display_name: 'Order Number',  variable_name: 'order_number',   value: orderNumber },
         ],
       },
       onSuccess: async (response: { reference: string }) => {
+        clearTimeout(fallbackTimer);
         paymentCompleted = true;
-        // Wait for order save to finish before updating status
         await savePromise;
         await supabase
           .from('orders')
           .update({ payment_status: 'paid', notes: `Paystack Ref: ${response.reference}` })
           .eq('order_number', orderNumber);
-
-        showToast({
+        clearCart();
+        settle({
           type: 'success',
           title: 'Order placed successfully!',
           message: `Your order ${orderNumber} has been confirmed. We'll be in touch shortly.`,
         });
-
-        clearCart();
-        setPendingOrderNumber(null);
         setOrderSuccess(orderNumber!);
-        setSubmitting(false);
       },
       onCancel: async () => {
+        clearTimeout(fallbackTimer);
         await savePromise;
         await supabase
           .from('orders')
           .update({ payment_status: 'failed', status: 'cancelled' })
           .eq('order_number', orderNumber);
         await reverseOrderSideEffects();
-        setPendingOrderNumber(null);
-        setPaymentError('Payment was cancelled. No charges were made.');
-        showToast({
-          type: 'cancelled',
-          title: 'Payment cancelled',
-          message: 'You cancelled the payment. No charges were made. You can try again anytime.',
-        });
-        setSubmitting(false);
+        settle(
+          { type: 'cancelled', title: 'Payment cancelled', message: 'You cancelled the payment. No charges were made.' },
+          'Payment was cancelled. No charges were made.',
+        );
       },
       onClose: async () => {
+        clearTimeout(fallbackTimer);
         if (!paymentCompleted) {
           await savePromise;
           await supabase
@@ -299,19 +299,15 @@ export default function CheckoutPage() {
             .update({ payment_status: 'failed', status: 'cancelled' })
             .eq('order_number', orderNumber);
           await reverseOrderSideEffects();
-          setPendingOrderNumber(null);
-          setPaymentError('Payment did not go through. Please try again or contact us for help.');
-          showToast({
-            type: 'failed',
-            title: 'Payment failed',
-            message: 'Your payment did not go through. No charges were made. Please try again or contact us.',
-          });
-          setSubmitting(false);
+          settle(
+            { type: 'failed', title: 'Payment failed', message: 'Your payment did not go through. No charges were made. Please try again or contact us.' },
+            'Payment did not go through. Please try again or contact us for help.',
+          );
         }
       },
     });
 
-    // Show toast and open iframe immediately — no await before this point
+    // Show toast then open iframe — both synchronous from the user gesture
     showToast({
       type: 'processing',
       title: 'Opening payment…',
@@ -372,7 +368,7 @@ export default function CheckoutPage() {
 
   return (
     <div className="min-h-screen pt-20 pb-24">
-      <ToastContainer toast={toast} onDismiss={dismissToast} />
+      <ToastContainer toast={toast} onDismiss={toast?.type === 'processing' ? dismissProcessingToast : dismissToast} />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
         <div className="flex items-center gap-3 mb-8">
           <Link to="/products" className="p-2 hover:bg-neutral-100 rounded-lg text-neutral-500 hover:text-neutral-800 transition-colors">
@@ -706,15 +702,13 @@ function Toast({ toast, onDismiss }: { toast: ToastState; onDismiss: () => void 
         <p className="text-neutral-500 text-xs mt-0.5 leading-relaxed">{toast.message}</p>
       </div>
 
-      {toast.type !== 'processing' && (
-        <button
-          onClick={onDismiss}
-          className="shrink-0 text-neutral-400 hover:text-neutral-700 transition-colors mt-0.5"
-          aria-label="Dismiss"
-        >
-          <XCircle size={16} />
-        </button>
-      )}
+      <button
+        onClick={onDismiss}
+        className="shrink-0 text-neutral-400 hover:text-neutral-700 transition-colors mt-0.5"
+        aria-label="Dismiss"
+      >
+        <XCircle size={16} />
+      </button>
     </motion.div>
   );
 }
