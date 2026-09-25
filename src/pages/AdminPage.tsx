@@ -757,11 +757,17 @@ function OrdersPanel() {
                     <td className="px-4 py-3">
                       {(order.order_items || []).length > 0 ? (
                         <div className="space-y-0.5">
-                          {(order.order_items || []).map((item: any) => (
-                            <p key={item.id} className="text-neutral-600 text-xs truncate max-w-48">
-                              {item.product_name} × {item.quantity}
-                            </p>
-                          ))}
+                          {(order.order_items || []).map((item: any) => {
+                            const parts = item.product_name.split(' - ');
+                            const name = parts[0];
+                            const color = parts.length > 1 ? parts.slice(1).join(' - ') : null;
+                            return (
+                              <div key={item.id}>
+                                <p className="text-neutral-700 text-xs truncate max-w-48">{name} × {item.quantity}</p>
+                                {color && <p className="text-primary-500 text-xs">Color: {color}</p>}
+                              </div>
+                            );
+                          })}
                         </div>
                       ) : (
                         <span className="text-neutral-600 text-xs italic">No items</span>

@@ -230,11 +230,20 @@ export default function CheckoutPage() {
     let paymentCompleted = false;
     let callbackFired = false;
 
-    // Kick off DB order creation in the background — MUST never throw
-    const savePromise = saveOrder('pending', undefined, undefined, orderNumber).catch(err => {
-      console.error('Background saveOrder failed:', err);
+    // Save the order to DB first — this is safe because setup() + openIframe()
+    // are called synchronously after, preserving the gesture chain on mobile.
+    // Only openIframe() needs to be in the direct gesture context, not setup().
+    const savedOrderNumber = await saveOrder('pending', undefined, undefined, orderNumber).catch(err => {
+      console.error('saveOrder failed:', err);
       return null;
     });
+
+    // If the DB insert failed entirely, stop here
+    if (!savedOrderNumber) {
+      setPaymentError('Could not create your order. Please try again or contact us.');
+      setSubmitting(false);
+      return;
+    }
 
     // Helper: clear processing state and show the outcome toast
     const settle = (toastData: ToastState, error?: string) => {
@@ -271,49 +280,48 @@ export default function CheckoutPage() {
         onSuccess: (response: { reference: string }) => {
           clearTimeout(fallbackTimer);
           paymentCompleted = true;
-          savePromise.then(() =>
-            supabase
-              .from('orders')
-              .update({ payment_status: 'paid', notes: `Paystack Ref: ${response.reference}` })
-              .eq('order_number', orderNumber)
-          ).then(() => {
-            clearCart();
-            settle({
-              type: 'success',
-              title: 'Order placed successfully!',
-              message: `Your order ${orderNumber} has been confirmed. We'll be in touch shortly.`,
+          supabase
+            .from('orders')
+            .update({ payment_status: 'paid', notes: `Paystack Ref: ${response.reference}` })
+            .eq('order_number', orderNumber)
+            .then(() => {
+              clearCart();
+              settle({
+                type: 'success',
+                title: 'Order placed successfully!',
+                message: `Your order ${orderNumber} has been confirmed. We'll be in touch shortly.`,
+              });
+              setOrderSuccess(orderNumber!);
             });
-            setOrderSuccess(orderNumber!);
-          });
         },
         onCancel: () => {
           clearTimeout(fallbackTimer);
-          savePromise.then(() =>
-            supabase
-              .from('orders')
-              .update({ payment_status: 'failed', status: 'cancelled' })
-              .eq('order_number', orderNumber)
-          ).then(() => reverseOrderSideEffects()).then(() => {
-            settle(
-              { type: 'cancelled', title: 'Payment cancelled', message: 'You cancelled the payment. No charges were made.' },
-              'Payment was cancelled. No charges were made.',
-            );
-          });
+          supabase
+            .from('orders')
+            .update({ payment_status: 'failed', status: 'cancelled' })
+            .eq('order_number', orderNumber)
+            .then(() => reverseOrderSideEffects())
+            .then(() => {
+              settle(
+                { type: 'cancelled', title: 'Payment cancelled', message: 'You cancelled the payment. No charges were made.' },
+                'Payment was cancelled. No charges were made.',
+              );
+            });
         },
         onClose: () => {
           clearTimeout(fallbackTimer);
           if (!paymentCompleted) {
-            savePromise.then(() =>
-              supabase
-                .from('orders')
-                .update({ payment_status: 'failed', status: 'cancelled' })
-                .eq('order_number', orderNumber)
-            ).then(() => reverseOrderSideEffects()).then(() => {
-              settle(
-                { type: 'failed', title: 'Payment failed', message: 'Your payment did not go through. No charges were made. Please try again or contact us.' },
-                'Payment did not go through. Please try again or contact us for help.',
-              );
-            });
+            supabase
+              .from('orders')
+              .update({ payment_status: 'failed', status: 'cancelled' })
+              .eq('order_number', orderNumber)
+              .then(() => reverseOrderSideEffects())
+              .then(() => {
+                settle(
+                  { type: 'failed', title: 'Payment failed', message: 'Your payment did not go through. No charges were made. Please try again or contact us.' },
+                  'Payment did not go through. Please try again or contact us for help.',
+                );
+              });
           }
         },
       });
