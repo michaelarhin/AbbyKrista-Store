@@ -152,12 +152,23 @@ export default function CheckoutPage() {
       console.error('Order items save error:', itemsError);
     }
 
-    // Reduce stock quantity for each purchased item
+    // Reduce global stock_quantity and per-color stock for each purchased item
     for (const item of items) {
-      const newQuantity = Math.max(0, item.product.stock_quantity - item.quantity);
+      const newQty = Math.max(0, item.product.stock_quantity - item.quantity);
+      const updatePayload: Record<string, any> = { stock_quantity: newQty };
+
+      // Also decrement color_stock if this item had a color selected
+      if (item.selectedColor && item.product.color_stock && item.product.color_stock[item.selectedColor] !== undefined) {
+        const updatedColorStock = {
+          ...item.product.color_stock,
+          [item.selectedColor]: Math.max(0, (item.product.color_stock[item.selectedColor] ?? 0) - item.quantity),
+        };
+        updatePayload.color_stock = updatedColorStock;
+      }
+
       await supabase
         .from('products')
-        .update({ stock_quantity: newQuantity })
+        .update(updatePayload)
         .eq('id', item.product.id);
     }
 
@@ -185,10 +196,20 @@ export default function CheckoutPage() {
   // Restore stock and discount usage when an order is cancelled/failed before payment
   const reverseOrderSideEffects = async () => {
     for (const item of items) {
-      const newQuantity = item.product.stock_quantity; // original quantity (not yet decremented since we track it locally)
+      const updatePayload: Record<string, any> = { stock_quantity: item.product.stock_quantity };
+
+      // Restore the specific color's stock if applicable
+      if (item.selectedColor && item.product.color_stock && item.product.color_stock[item.selectedColor] !== undefined) {
+        const restoredColorStock = {
+          ...item.product.color_stock,
+          [item.selectedColor]: (item.product.color_stock[item.selectedColor] ?? 0) + item.quantity,
+        };
+        updatePayload.color_stock = restoredColorStock;
+      }
+
       await supabase
         .from('products')
-        .update({ stock_quantity: item.product.stock_quantity })
+        .update(updatePayload)
         .eq('id', item.product.id);
     }
     if (discountResult) {

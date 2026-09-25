@@ -24,6 +24,7 @@ export interface Product {
   is_featured: boolean;
   tags: string[];
   colors: string[];
+  color_stock: Record<string, number>;
   weight: number | null;
   created_at: string;
   updated_at: string;

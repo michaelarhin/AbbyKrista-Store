@@ -187,6 +187,9 @@ function ProductsPanel() {
     return { name: '', description: '', price: '', compare_at_price: '', category_id: '', stock_quantity: '', low_stock_threshold: '5', sku: '', images: '', tags: '', colors: '', is_active: true, is_featured: false };
   }
 
+  // Per-color stock quantities — kept separate from the text form state
+  const [colorStock, setColorStock] = useState<Record<string, number>>({});
+
   const loadData = async () => {
     setLoading(true);
     const [prodRes, catRes] = await Promise.all([
@@ -203,6 +206,7 @@ function ProductsPanel() {
   const openCreate = () => {
     setEditing(null);
     setForm(blankProduct());
+    setColorStock({});
     setImageFiles([]);
     setImagePreviews([]);
     setFormOpen(true);
@@ -219,6 +223,7 @@ function ProductsPanel() {
       colors: (p.colors || []).join(', '),
       is_active: p.is_active, is_featured: p.is_featured,
     });
+    setColorStock(p.color_stock || {});
     setImageFiles([]);
     setImagePreviews(p.images || []);
     setFormOpen(true);
@@ -293,6 +298,13 @@ function ProductsPanel() {
     const existingUrls = form.images.split('\n').map(s => s.trim()).filter(Boolean);
     const allImages = [...existingUrls, ...uploadedUrls];
 
+    const colorList = form.colors.split(',').map(s => s.trim()).filter(Boolean);
+    // Compute total stock from color_stock when colors are defined,
+    // otherwise use the manually entered stock_quantity
+    const totalStock = colorList.length > 0
+      ? colorList.reduce((sum, c) => sum + (colorStock[c] || 0), 0)
+      : parseInt(form.stock_quantity);
+
     const payload: any = {
       name: form.name,
       slug: slugify(form.name),
@@ -300,12 +312,13 @@ function ProductsPanel() {
       price: parseFloat(form.price),
       compare_at_price: form.compare_at_price ? parseFloat(form.compare_at_price) : null,
       category_id: form.category_id || null,
-      stock_quantity: parseInt(form.stock_quantity),
+      stock_quantity: totalStock,
       low_stock_threshold: parseInt(form.low_stock_threshold),
       sku: form.sku || null,
       images: allImages,
       tags: form.tags.split(',').map(s => s.trim()).filter(Boolean),
-      colors: form.colors.split(',').map(s => s.trim()).filter(Boolean),
+      colors: colorList,
+      color_stock: colorList.length > 0 ? colorStock : {},
       is_active: form.is_active,
       is_featured: form.is_featured,
       updated_at: new Date().toISOString(),
@@ -317,6 +330,7 @@ function ProductsPanel() {
     }
     setSaving(false);
     setFormOpen(false);
+    setColorStock({});
     setImageFiles([]);
     setImagePreviews([]);
     loadData();
@@ -370,7 +384,26 @@ function ProductsPanel() {
                     </td>
                     <td className="px-4 py-3 text-neutral-800 text-xs">{formatPrice(p.price, 'GHS')}</td>
                     <td className="px-4 py-3">
-                      <StockBadge quantity={p.stock_quantity} threshold={p.low_stock_threshold} />
+                      {p.colors && p.colors.length > 0 && p.color_stock && Object.keys(p.color_stock).length > 0 ? (
+                        <div className="space-y-0.5">
+                          {p.colors.map(color => {
+                            const qty = p.color_stock[color] ?? 0;
+                            const isOut = qty === 0;
+                            const isLow = qty > 0 && qty <= p.low_stock_threshold;
+                            return (
+                              <div key={color} className="flex items-center gap-1.5">
+                                <span className="text-neutral-500 text-xs w-20 truncate">{color}:</span>
+                                <span className={`text-xs font-medium ${isOut ? 'text-error-400' : isLow ? 'text-warning-400' : 'text-success-400'}`}>
+                                  {qty}{isOut ? ' ✕' : isLow ? ' !' : ''}
+                                </span>
+                              </div>
+                            );
+                          })}
+                          <p className="text-neutral-400 text-xs pt-0.5">Total: {p.stock_quantity}</p>
+                        </div>
+                      ) : (
+                        <StockBadge quantity={p.stock_quantity} threshold={p.low_stock_threshold} />
+                      )}
                     </td>
                     <td className="px-4 py-3">
                       <span className={`px-2 py-0.5 rounded-full text-xs ${p.is_active ? 'bg-success-500/10 text-success-400' : 'bg-neutral-100 text-neutral-500'}`}>
@@ -493,8 +526,62 @@ function ProductsPanel() {
 
               <div>
                 <label className="text-neutral-400 text-xs mb-1.5 block">Colors (comma-separated)</label>
-                <input value={form.colors} onChange={e => setForm(f => ({ ...f, colors: e.target.value }))} className="input-field text-sm" placeholder="Black, White, Pink, Beige" />
+                <input
+                  value={form.colors}
+                  onChange={e => {
+                    const val = e.target.value;
+                    setForm(f => ({ ...f, colors: val }));
+                    // Sync colorStock keys — preserve existing quantities
+                    const newColors = val.split(',').map(s => s.trim()).filter(Boolean);
+                    setColorStock(prev => {
+                      const next: Record<string, number> = {};
+                      newColors.forEach(c => { next[c] = prev[c] ?? 0; });
+                      return next;
+                    });
+                  }}
+                  className="input-field text-sm"
+                  placeholder="Black, White, Pink, Beige"
+                />
                 <p className="text-neutral-600 text-xs mt-1">Customers will pick from these on the product page. Leave blank for no color options.</p>
+
+                {/* Per-color stock inputs */}
+                {form.colors.split(',').map(s => s.trim()).filter(Boolean).length > 0 && (
+                  <div className="mt-3 space-y-2">
+                    <p className="text-neutral-500 text-xs font-medium">Stock per color</p>
+                    {form.colors.split(',').map(s => s.trim()).filter(Boolean).map(color => {
+                      const qty = colorStock[color] ?? 0;
+                      const threshold = parseInt(form.low_stock_threshold) || 5;
+                      const isLow = qty > 0 && qty <= threshold;
+                      const isOut = qty === 0;
+                      return (
+                        <div key={color} className="flex items-center gap-3">
+                          <span className={`w-28 text-xs font-medium truncate ${isOut ? 'text-error-400' : isLow ? 'text-warning-400' : 'text-neutral-700'}`}>
+                            {color}
+                          </span>
+                          <input
+                            type="number"
+                            min={0}
+                            value={qty}
+                            onChange={e => setColorStock(prev => ({ ...prev, [color]: Math.max(0, parseInt(e.target.value) || 0) }))}
+                            className="input-field text-sm w-24 py-1.5"
+                          />
+                          <span className="text-xs">
+                            {isOut
+                              ? <span className="text-error-400">Out of stock</span>
+                              : isLow
+                                ? <span className="text-warning-400">Low stock</span>
+                                : <span className="text-success-400">In stock</span>}
+                          </span>
+                        </div>
+                      );
+                    })}
+                    <p className="text-neutral-600 text-xs pt-1">
+                      Total: <span className="text-neutral-800 font-medium">
+                        {form.colors.split(',').map(s => s.trim()).filter(Boolean).reduce((sum, c) => sum + (colorStock[c] || 0), 0)}
+                      </span> units across all colors
+                    </p>
+                  </div>
+                )}
               </div>
 
               <div className="flex gap-6">
