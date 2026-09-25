@@ -54,6 +54,12 @@ export default function ProductDetailPage() {
       setColorError(true);
       return;
     }
+    // Check per-color stock if available
+    const hasColorStock = product.color_stock && Object.keys(product.color_stock).length > 0;
+    if (hasColorStock && selectedColor && (product.color_stock[selectedColor] ?? 0) === 0) {
+      setColorError(false);
+      return; // button should already be disabled but guard here too
+    }
     addItem(product, quantity, selectedColor || undefined);
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
@@ -228,24 +234,45 @@ export default function ProductDetailPage() {
                   )}
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {product.colors.map(color => (
-                    <button
-                      key={color}
-                      type="button"
-                      onClick={() => { setSelectedColor(color); setColorError(false); }}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-full border text-sm transition-all duration-200 ${
-                        selectedColor === color
-                          ? 'border-primary-500 bg-primary-50 text-primary-600'
-                          : 'border-neutral-300 text-neutral-600 hover:border-primary-300'
-                      }`}
-                    >
-                      <span
-                        className="w-4 h-4 rounded-full border border-neutral-300 shrink-0"
-                        style={{ backgroundColor: color.toLowerCase() }}
-                      />
-                      {color}
-                    </button>
-                  ))}
+                  {product.colors.map(color => {
+                    const hasColorStock = product.color_stock && Object.keys(product.color_stock).length > 0;
+                    const colorQty = hasColorStock ? (product.color_stock[color] ?? 0) : null;
+                    const isColorOut = colorQty !== null && colorQty === 0;
+                    const isColorLow = colorQty !== null && colorQty > 0 && colorQty <= product.low_stock_threshold;
+                    return (
+                      <button
+                        key={color}
+                        type="button"
+                        disabled={isColorOut}
+                        onClick={() => {
+                          setSelectedColor(color);
+                          setColorError(false);
+                          // Reset quantity to 1 when switching colors
+                          setQuantity(1);
+                        }}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-full border text-sm transition-all duration-200 ${
+                          isColorOut
+                            ? 'border-neutral-200 text-neutral-400 opacity-50 cursor-not-allowed line-through'
+                            : selectedColor === color
+                              ? 'border-primary-500 bg-primary-50 text-primary-600'
+                              : 'border-neutral-300 text-neutral-600 hover:border-primary-300'
+                        }`}
+                      >
+                        <span
+                          className="w-4 h-4 rounded-full border border-neutral-300 shrink-0"
+                          style={{ backgroundColor: color.toLowerCase() }}
+                        />
+                        <span>{color}</span>
+                        {colorQty !== null && (
+                          <span className={`text-xs ${
+                            isColorOut ? 'text-neutral-400' : isColorLow ? 'text-warning-500 font-medium' : 'text-neutral-400'
+                          }`}>
+                            {isColorOut ? '· sold out' : isColorLow ? `· ${colorQty} left` : `· ${colorQty}`}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
                 {colorError && (
                   <p className="text-error-500 text-xs mt-2">Please select a color before adding to cart.</p>
@@ -255,51 +282,78 @@ export default function ProductDetailPage() {
 
             {/* Stock */}
             <div className="flex items-center gap-2 mb-8">
-              {product.stock_quantity === 0 ? (
-                <span className="flex items-center gap-2 text-error-400 text-sm">
-                  <span className="w-2 h-2 rounded-full bg-error-400" />
-                  Out of stock
-                </span>
-              ) : product.stock_quantity <= product.low_stock_threshold ? (
-                <span className="flex items-center gap-2 text-warning-400 text-sm">
-                  <span className="w-2 h-2 rounded-full bg-warning-400 animate-pulse" />
-                  Only {product.stock_quantity} left!
-                </span>
-              ) : (
-                <span className="flex items-center gap-2 text-success-400 text-sm">
-                  <span className="w-2 h-2 rounded-full bg-success-400" />
-                  In stock
-                </span>
-              )}
+              {(() => {
+                const hasColorStock = product.color_stock && Object.keys(product.color_stock).length > 0;
+                const displayQty = hasColorStock && selectedColor
+                  ? (product.color_stock[selectedColor] ?? 0)
+                  : product.stock_quantity;
+                if (displayQty === 0) return (
+                  <span className="flex items-center gap-2 text-error-400 text-sm">
+                    <span className="w-2 h-2 rounded-full bg-error-400" />
+                    {selectedColor ? `${selectedColor} is out of stock` : 'Out of stock'}
+                  </span>
+                );
+                if (displayQty <= product.low_stock_threshold) return (
+                  <span className="flex items-center gap-2 text-warning-400 text-sm">
+                    <span className="w-2 h-2 rounded-full bg-warning-400 animate-pulse" />
+                    Only {displayQty} left{selectedColor ? ` in ${selectedColor}` : ''}!
+                  </span>
+                );
+                return (
+                  <span className="flex items-center gap-2 text-success-400 text-sm">
+                    <span className="w-2 h-2 rounded-full bg-success-400" />
+                    In stock
+                  </span>
+                );
+              })()}
             </div>
 
             {/* Quantity */}
             <div className="flex items-center gap-4 mb-6">
-              <div className="flex items-center border border-neutral-200 rounded-full overflow-hidden">
-                <button
-                  onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                  className="w-10 h-10 flex items-center justify-center hover:bg-neutral-50 transition-colors"
-                >
-                  <Minus size={14} />
-                </button>
-                <span className="w-10 text-center text-sm font-medium">{quantity}</span>
-                <button
-                  onClick={() => setQuantity(q => Math.min(product.stock_quantity, q + 1))}
-                  className="w-10 h-10 flex items-center justify-center hover:bg-neutral-50 transition-colors"
-                >
-                  <Plus size={14} />
-                </button>
-              </div>
-
-              <span className="text-neutral-600 text-xs">{product.stock_quantity} available</span>
+              {(() => {
+                const hasColorStock = product.color_stock && Object.keys(product.color_stock).length > 0;
+                const maxQty = hasColorStock && selectedColor
+                  ? (product.color_stock[selectedColor] ?? 0)
+                  : product.stock_quantity;
+                return (
+                  <>
+                    <div className="flex items-center border border-neutral-200 rounded-full overflow-hidden">
+                      <button
+                        onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                        className="w-10 h-10 flex items-center justify-center hover:bg-neutral-50 transition-colors"
+                      >
+                        <Minus size={14} />
+                      </button>
+                      <span className="w-10 text-center text-sm font-medium">{quantity}</span>
+                      <button
+                        onClick={() => setQuantity(q => Math.min(maxQty, q + 1))}
+                        className="w-10 h-10 flex items-center justify-center hover:bg-neutral-50 transition-colors"
+                      >
+                        <Plus size={14} />
+                      </button>
+                    </div>
+                    <span className="text-neutral-600 text-xs">{maxQty} available{selectedColor ? ` in ${selectedColor}` : ''}</span>
+                  </>
+                );
+              })()}
             </div>
 
             {/* CTA */}
             <div className="flex gap-3">
               <button
                 onClick={handleAddToCart}
-                disabled={product.stock_quantity === 0}
-                className={`flex-1 btn-primary justify-center py-4 text-base relative overflow-hidden ${product.stock_quantity === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                disabled={(() => {
+                  const hasColorStock = product.color_stock && Object.keys(product.color_stock).length > 0;
+                  if (hasColorStock && selectedColor) return (product.color_stock[selectedColor] ?? 0) === 0;
+                  return product.stock_quantity === 0;
+                })()}
+                className={`flex-1 btn-primary justify-center py-4 text-base relative overflow-hidden ${
+                  (() => {
+                    const hasColorStock = product.color_stock && Object.keys(product.color_stock).length > 0;
+                    const isOut = hasColorStock && selectedColor ? (product.color_stock[selectedColor] ?? 0) === 0 : product.stock_quantity === 0;
+                    return isOut ? 'opacity-50 cursor-not-allowed' : '';
+                  })()
+                }`}
               >
                 <AnimatePresence mode="wait">
                   {added ? (
