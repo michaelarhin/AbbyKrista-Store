@@ -306,13 +306,15 @@ export default function CheckoutPage() {
             .update({ payment_status: 'paid', notes: `Paystack Ref: ${response.reference}` })
             .eq('order_number', orderNumber)
             .then(() => {
+              // Set success BEFORE clearing cart — prevents the empty-cart
+              // guard from flashing while state updates propagate
+              setOrderSuccess(orderNumber!);
               clearCart();
               settle({
                 type: 'success',
                 title: 'Order placed successfully!',
                 message: `Your order ${orderNumber} has been confirmed. We'll be in touch shortly.`,
               });
-              setOrderSuccess(orderNumber!);
             });
         },
         onCancel: () => {
@@ -378,7 +380,7 @@ export default function CheckoutPage() {
     }
   };
 
-  if (items.length === 0 && !orderSuccess) {
+  if (items.length === 0 && !orderSuccess && !submitting) {
     return (
       <div className="min-h-screen pt-24 flex flex-col items-center justify-center text-center px-4">
         <Package size={64} className="text-neutral-700 mb-4" />
