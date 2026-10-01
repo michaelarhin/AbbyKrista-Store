@@ -806,12 +806,21 @@ function OrdersPanel() {
   useEffect(() => { load(); }, []);
 
   const updateStatus = async (id: string, status: string) => {
-    await supabase.from('orders').update({ status, updated_at: new Date().toISOString() }).eq('id', id);
+    const { error } = await supabase.from('orders').update({ status, updated_at: new Date().toISOString() }).eq('id', id);
+    if (error) console.error('updateStatus error:', error);
     load();
     if (selected?.id === id) setSelected(prev => prev ? { ...prev, status: status as any } : null);
   };
 
+  const updatePaymentStatus = async (id: string, payment_status: string) => {
+    const { error } = await supabase.from('orders').update({ payment_status, updated_at: new Date().toISOString() }).eq('id', id);
+    if (error) console.error('updatePaymentStatus error:', error);
+    load();
+    if (selected?.id === id) setSelected(prev => prev ? { ...prev, payment_status: payment_status as any } : null);
+  };
+
   const statuses = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'];
+  const paymentStatuses = ['pending', 'paid', 'failed', 'refunded'];
 
   return (
     <div className="space-y-6">
@@ -862,7 +871,18 @@ function OrdersPanel() {
                     </td>
                     <td className="px-4 py-3 text-neutral-800 text-xs">{formatPrice(order.total, 'GHS')}</td>
                     <td className="px-4 py-3">
-                      <PaymentStatusBadge status={order.payment_status} />
+                      <select
+                        value={order.payment_status}
+                        onChange={e => updatePaymentStatus(order.id, e.target.value)}
+                        className={`text-xs border rounded-lg px-2 py-1 focus:outline-none focus:border-neutral-400 ${
+                          order.payment_status === 'paid' ? 'bg-success-500/10 text-success-400 border-success-500/20' :
+                          order.payment_status === 'failed' ? 'bg-error-500/10 text-error-400 border-error-500/20' :
+                          order.payment_status === 'refunded' ? 'bg-neutral-100 text-neutral-500 border-neutral-200' :
+                          'bg-warning-500/10 text-warning-400 border-warning-500/20'
+                        }`}
+                      >
+                        {paymentStatuses.map(s => <option key={s} value={s} className="bg-white text-neutral-800">{s}</option>)}
+                      </select>
                     </td>
                     <td className="px-4 py-3">
                       <select
@@ -902,11 +922,23 @@ function OrdersPanel() {
                 <Info2 label="Phone" value={selected.customer_phone} />
                 <Info2 label="Payment Method" value={selected.payment_method.replace(/_/g, ' ')} />
               </div>
-              <div className="flex items-center gap-3">
-                <span className="text-neutral-500 text-xs">Payment Status:</span>
-                <PaymentStatusBadge status={selected.payment_status} />
-                <span className="text-neutral-500 text-xs ml-4">Order Status:</span>
-                <StatusBadge status={selected.status} />
+              <div className="flex items-center gap-3 flex-wrap">
+                <span className="text-neutral-500 text-xs">Payment:</span>
+                <select
+                  value={selected.payment_status}
+                  onChange={e => updatePaymentStatus(selected.id, e.target.value)}
+                  className="text-xs border border-neutral-200 rounded-lg px-2 py-1 bg-transparent focus:outline-none focus:border-neutral-400"
+                >
+                  {paymentStatuses.map(s => <option key={s} value={s} className="bg-white text-neutral-800">{s}</option>)}
+                </select>
+                <span className="text-neutral-500 text-xs ml-2">Order:</span>
+                <select
+                  value={selected.status}
+                  onChange={e => updateStatus(selected.id, e.target.value)}
+                  className="text-xs border border-neutral-200 rounded-lg px-2 py-1 bg-transparent focus:outline-none focus:border-neutral-400"
+                >
+                  {statuses.map(s => <option key={s} value={s} className="bg-white text-neutral-800">{s}</option>)}
+                </select>
               </div>
               {selected.shipping_address && (
                 <Info2
