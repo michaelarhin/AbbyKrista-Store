@@ -15,6 +15,25 @@ declare global {
 }
 
 const PAYSTACK_KEY = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
+const ARKESEL_API_KEY = import.meta.env.VITE_ARKESEL_API_KEY;
+const ARKESEL_SENDER_ID = import.meta.env.VITE_ARKESEL_SENDER_ID || 'AbbyKrista';
+
+// Send an SMS via Arkesel API (fire-and-forget — never blocks the checkout flow)
+const sendSms = (phone: string, message: string) => {
+  if (!ARKESEL_API_KEY) return;
+  // Normalise GH numbers: strip spaces, strip leading +, replace leading 0 with 233
+  const normalised = phone.replace(/\s+/g, '').replace(/^\+/, '');
+  const e164 = normalised.startsWith('0') ? `233${normalised.slice(1)}` : normalised;
+  const params = new URLSearchParams({
+    action: 'send-sms',
+    api_key: ARKESEL_API_KEY,
+    to: e164,
+    from: ARKESEL_SENDER_ID,
+    sms: message,
+  });
+  fetch(`https://sms.arkesel.com/sms/api?${params.toString()}`)
+    .catch(err => console.error('SMS send failed:', err));
+};
 
 const REGIONS = ['Greater Accra', 'Ashanti', 'Central', 'Eastern', 'Western', 'Northern', 'Upper East', 'Upper West', 'Volta', 'Brong-Ahafo', 'Oti', 'Savanna', 'North East', 'Bono', 'Bono East', 'Ahafo', 'Western North'];
 
@@ -306,6 +325,11 @@ export default function CheckoutPage() {
             .update({ payment_status: 'paid', notes: `Paystack Ref: ${response.reference}` })
             .eq('order_number', orderNumber)
             .then(() => {
+              // Send order confirmation SMS to customer
+              sendSms(
+                form.customer_phone,
+                `Hi ${form.customer_name}, your order ${orderNumber} has been accepted and will be delivered within 3-7 working days. Thank you for shopping with AbbyKrista Outlet!`
+              );
               // Set success BEFORE clearing cart — prevents the empty-cart
               // guard from flashing while state updates propagate
               setOrderSuccess(orderNumber!);
