@@ -14,6 +14,8 @@ serve(async (req) => {
   try {
     const { phone, message } = await req.json();
 
+    console.log('send-sms called with phone:', phone);
+
     if (!phone || !message) {
       return new Response(
         JSON.stringify({ error: 'phone and message are required' }),
@@ -23,6 +25,8 @@ serve(async (req) => {
 
     const apiKey = Deno.env.get('ARKESEL_API_KEY');
     const senderId = Deno.env.get('ARKESEL_SENDER_ID') || 'AbbyKrista';
+
+    console.log('API key present:', !!apiKey, 'Sender ID:', senderId);
 
     if (!apiKey) {
       return new Response(
@@ -35,8 +39,10 @@ serve(async (req) => {
     const normalised = phone.replace(/\s+/g, '').replace(/^\+/, '');
     const e164 = normalised.startsWith('0') ? `233${normalised.slice(1)}` : normalised;
 
+    console.log('Sending SMS to:', e164);
+
     // Arkesel v2 API
-    const response = await fetch('https://sms.arkesel.com/api/v2/sms/send', {
+    const arkeselRes = await fetch('https://sms.arkesel.com/api/v2/sms/send', {
       method: 'POST',
       headers: {
         'api-key': apiKey,
@@ -49,13 +55,15 @@ serve(async (req) => {
       }),
     });
 
-    const result = await response.json();
+    const result = await arkeselRes.json();
+    console.log('Arkesel response:', JSON.stringify(result));
 
     return new Response(
       JSON.stringify({ success: true, result }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (err) {
+    console.error('Edge function error:', err);
     return new Response(
       JSON.stringify({ error: String(err) }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

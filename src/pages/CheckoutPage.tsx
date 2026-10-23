@@ -17,19 +17,21 @@ declare global {
 const PAYSTACK_KEY = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
-const ARKESEL_SENDER_ID = import.meta.env.VITE_ARKESEL_SENDER_ID || 'AbbyKrista';
 
 // Send SMS via Supabase Edge Function (server-side — avoids CORS)
 const sendSms = (phone: string, message: string) => {
-  if (!SUPABASE_URL) return;
   fetch(`${SUPABASE_URL}/functions/v1/send-sms`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+      'apikey': SUPABASE_ANON_KEY,
     },
     body: JSON.stringify({ phone, message }),
-  }).catch(err => console.error('SMS send failed:', err));
+  })
+    .then(res => res.json())
+    .then(data => console.log('SMS response:', data))
+    .catch(err => console.error('SMS send failed:', err));
 };
 
 const REGIONS = ['Greater Accra', 'Ashanti', 'Central', 'Eastern', 'Western', 'Northern', 'Upper East', 'Upper West', 'Volta', 'Brong-Ahafo', 'Oti', 'Savanna', 'North East', 'Bono', 'Bono East', 'Ahafo', 'Western North'];
