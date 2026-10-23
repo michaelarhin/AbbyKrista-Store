@@ -15,24 +15,21 @@ declare global {
 }
 
 const PAYSTACK_KEY = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
-const ARKESEL_API_KEY = import.meta.env.VITE_ARKESEL_API_KEY;
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const ARKESEL_SENDER_ID = import.meta.env.VITE_ARKESEL_SENDER_ID || 'AbbyKrista';
 
-// Send an SMS via Arkesel API (fire-and-forget — never blocks the checkout flow)
+// Send SMS via Supabase Edge Function (server-side — avoids CORS)
 const sendSms = (phone: string, message: string) => {
-  if (!ARKESEL_API_KEY) return;
-  // Normalise GH numbers: strip spaces, strip leading +, replace leading 0 with 233
-  const normalised = phone.replace(/\s+/g, '').replace(/^\+/, '');
-  const e164 = normalised.startsWith('0') ? `233${normalised.slice(1)}` : normalised;
-  const params = new URLSearchParams({
-    action: 'send-sms',
-    api_key: ARKESEL_API_KEY,
-    to: e164,
-    from: ARKESEL_SENDER_ID,
-    sms: message,
-  });
-  fetch(`https://sms.arkesel.com/sms/api?${params.toString()}`)
-    .catch(err => console.error('SMS send failed:', err));
+  if (!SUPABASE_URL) return;
+  fetch(`${SUPABASE_URL}/functions/v1/send-sms`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+    },
+    body: JSON.stringify({ phone, message }),
+  }).catch(err => console.error('SMS send failed:', err));
 };
 
 const REGIONS = ['Greater Accra', 'Ashanti', 'Central', 'Eastern', 'Western', 'Northern', 'Upper East', 'Upper West', 'Volta', 'Brong-Ahafo', 'Oti', 'Savanna', 'North East', 'Bono', 'Bono East', 'Ahafo', 'Western North'];
@@ -320,26 +317,28 @@ export default function CheckoutPage() {
         onSuccess: (response: { reference: string }) => {
           clearTimeout(fallbackTimer);
           paymentCompleted = true;
+
+          // Clear cart and show success screen IMMEDIATELY — don't wait for DB
+          setOrderSuccess(orderNumber!);
+          clearCart();
+          settle({
+            type: 'success',
+            title: 'Order placed successfully!',
+            message: `Your order ${orderNumber} has been confirmed. We'll be in touch shortly.`,
+          });
+
+          // Update DB and send SMS in the background
           supabase
             .from('orders')
             .update({ payment_status: 'paid', notes: `Paystack Ref: ${response.reference}` })
             .eq('order_number', orderNumber)
             .then(() => {
-              // Send order confirmation SMS to customer
               sendSms(
                 form.customer_phone,
                 `Hi ${form.customer_name}, your order ${orderNumber} has been accepted and will be delivered within 3-7 working days. Thank you for shopping with AbbyKrista Outlet!`
               );
-              // Set success BEFORE clearing cart — prevents the empty-cart
-              // guard from flashing while state updates propagate
-              setOrderSuccess(orderNumber!);
-              clearCart();
-              settle({
-                type: 'success',
-                title: 'Order placed successfully!',
-                message: `Your order ${orderNumber} has been confirmed. We'll be in touch shortly.`,
-              });
-            });
+            })
+            .catch(err => console.error('Post-payment DB update failed:', err));
         },
         onCancel: () => {
           clearTimeout(fallbackTimer);
